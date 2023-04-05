@@ -64,9 +64,5 @@ exports.genKey = (length, group) => {
     const code = new Generator(options);
 
     return code;
-    code.get((error, code) => {
-        if (error) return console.error(error)
-        console.log(code);
-    })
 
 }
