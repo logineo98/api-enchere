@@ -32,19 +32,10 @@ exports.compareTwoArray = (tableau1, tableau2) => {
     return false;
 };
 
-exports.isEmpty = (value) =>
-    value === undefined ||
-    value === null ||
-    (typeof value === "object" && Object.keys(value).length === 0) ||
-    (typeof value === "string" && value.trim().length === 0);
+exports.isEmpty = (value) => value === undefined || value === null || (typeof value === "object" && Object.keys(value).length === 0) || (typeof value === "string" && value.trim().length === 0);
 
 exports.genLicenseKey = (user) => {
-    var licenseData = {
-        info: user,
-        prodCode: "LEN100120",
-        appVersion: "1.5",
-        osType: "IOS8",
-    };
+    var licenseData = { info: user, prodCode: "LEN100120", appVersion: "1.5", osType: "IOS8" }
 
     const key = licenseKey.createLicense(licenseData);
     return key.license;
@@ -64,5 +55,4 @@ exports.genKey = (length, group) => {
     const code = new Generator(options);
 
     return code;
-
 }
