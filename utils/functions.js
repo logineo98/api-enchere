@@ -60,10 +60,10 @@ exports.genKey = (length, group) => {
 
 //use of function 
 //const resp = sendSMS("0022379364385", "0022379364385", "message test for sms")
-exports.sendSMS = async (to, from, message) => {
+exports.sendSMS = async (from, to, message) => {
     try {
-        const vonage = new Vonage({ apiKey: "5a693ef2", apiSecret: "MQn09kvhxz3xYoUd" });
-        const ans = await vonage.sms.send({ to, from, text: message, });
+        const vonage = new Vonage({ apiKey: process.env.VONAGE_API_KEY, apiSecret: process.env.VONAGE_API_SECRET });
+        const ans = await vonage.sms.send({ to, from, text: message });
         return ans;
     } catch (error) {
         return error;

@@ -1,3 +1,4 @@
+const { isValidObjectId } = require("mongoose");
 const UserModel = require("../models/user.model");
 const { isEmpty } = require("../utils/functions");
 
@@ -43,4 +44,10 @@ exports.delete_user = async (req, res) => {
         res.status(500).send({ message: error.message });
     }
 
+}
+
+exports.send_invitation = (req, res) => {
+    if (!isValidObjectId(req.params.id)) {
+        return res.status(400).json({ error: "Désolé l'identifiant de l'utilisateur n'est pas correc !" });
+    }
 }

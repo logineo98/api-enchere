@@ -1,11 +1,7 @@
-
 const JsonWebToken = require("jsonwebtoken")
 const UserModel = require("../models/user.model")
-const { isEmpty, genKey } = require("../utils/functions")
+const { isEmpty, genKey, sendSMS } = require("../utils/functions")
 const bcrypt = require('bcrypt')
-const twilio = require('twilio')
-
-
 
 //check if got token is valid then send true else send false
 exports.checking = async (req, res) => {
@@ -115,10 +111,12 @@ exports.register = (req, res) => {
                     }
                 })
 
+                // va contenir le hash du message
                 bcrypt.hash(password, 10)
                     .then(hash => {
                         const user = new UserModel({ email, phone, password: hash })
 
+                        // une clé de licence sera generee
                         const licenceKey = genKey()
                         licenceKey.get((error, code) => {
                             if (error) return res.status(500).json({ message: error.message })
@@ -130,7 +128,13 @@ exports.register = (req, res) => {
 
                                     user.save()
                                         .then((user) => {
-                                            res.status(201).json({ response: user, message: "L'utilisateur a été crée avec succès" })
+
+                                            // l'envoie de la clé de la licence a l'utilisateur
+                                            sendSMS("0022379364385", "0022373030732", code)
+                                                .then(sms => {
+                                                    res.status(201).json({ response: user, message: "L'utilisateur a été crée avec succès", sms })
+                                                })
+                                                .catch((error) => res.status(500).json({ message: error.message }))
                                         })
                                         .catch((error) => res.status(500).json({ message: error.message }))
                                 })
@@ -153,7 +157,12 @@ exports.register = (req, res) => {
 
                                     user.save()
                                         .then((user) => {
-                                            res.status(201).json({ response: user, message: "L'utilisateur a été crée avec succès" })
+
+                                            sendSMS("0022379364385", "0022373030732", code)
+                                                .then(sms => {
+                                                    res.status(201).json({ response: user, message: "L'utilisateur a été crée avec succès", sms })
+                                                })
+                                                .catch((error) => res.status(500).json({ message: error.message }))
                                         })
                                         .catch((error) => res.status(500).json({ message: error.message }))
                                 })
