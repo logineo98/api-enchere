@@ -14,7 +14,7 @@ exports.login_validation = async (req, res, next) => {
         if (isEmpty(email)) errors = "Email ou mot de passe incorrect.";
         if (!isEmpty(user)) errors = "Cet email est déjà utilisé."
         if (isEmpty(password)) errors = "Email ou mot de passe incorrect.";
-        if (password.length < 3) errors = "Mot de passe trop court."
+        if (password.length < 6) errors = "Mot de passe trop court."
 
         req.error = errors;
         next()

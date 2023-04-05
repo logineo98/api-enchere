@@ -16,6 +16,6 @@ const enchere_sch = new mongoose.Schema({
         buyerID: { type: mongoose.Types.ObjectId, ref: "User", required: true },
         montant: { type: Number, required: true },
     }],
-});
+}, { timestamps: true });
 const EnchereModel = mongoose.model("Enchere", enchere_sch);
 module.exports = EnchereModel;
