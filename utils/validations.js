@@ -1,7 +1,5 @@
 const { isValidObjectId } = require("mongoose");
-const UserModel = require("../models/user.model");
 const { isEmpty } = require("./functions");
-
 
 exports.login_validation = async (req, res, next) => {
     try {

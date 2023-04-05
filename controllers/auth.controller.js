@@ -1,8 +1,9 @@
 
 const JsonWebToken = require("jsonwebtoken");
 const UserModel = require("../models/user.model");
-const { isEmpty } = require("../utils/functions");
+const { isEmpty, genKey } = require("../utils/functions");
 const bcrypt = require('bcrypt');
+
 
 //check if got token is valid then send true else send false
 exports.checking = async (req, res) => {
@@ -104,3 +105,4 @@ exports.register = async (req, res) => {
     }
 
 }
+

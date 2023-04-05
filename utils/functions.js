@@ -1,5 +1,7 @@
 const licenseKey = require("license-key-gen");
 const nodemailer = require("nodemailer");
+const Generator = require("license-key-generator");
+
 
 exports.sendEmail = (auth, subject, text, from, to) => {
     const transporter = nodemailer.createTransport({
@@ -46,4 +48,25 @@ exports.genLicenseKey = (user) => {
 
     const key = licenseKey.createLicense(licenseData);
     return key.license;
+}
+
+//to use this function
+// const cle=key(16,4)
+//cle.get((error,code)=> if(!error) console.log(code))
+exports.genKey = (length, group) => {
+    const options = {
+        type: "random", // default "random"
+        length: length || 16, // default 16
+        group: group || 4, // default 4
+        split: "-", // default "-"
+        splitStatus: true // default true
+    }
+    const code = new Generator(options);
+
+    return code;
+    code.get((error, code) => {
+        if (error) return console.error(error)
+        console.log(code);
+    })
+
 }

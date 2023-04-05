@@ -1,4 +1,4 @@
-const { login, register, checking, profile, licenseActivation } = require('../controllers/auth.controller');
+const { login, register, checking, profile, licenseActivation, gen } = require('../controllers/auth.controller');
 const { get_user, get_users, update_user, delete_user } = require('../controllers/user.controller');
 const { authenticate } = require('../middleware/middleware');
 const { login_validation, licenseActivation_validation } = require('../utils/validations');
@@ -14,7 +14,8 @@ router.post("/", register);
 router.get("/:id", get_user);
 router.get("/", get_users);
 router.put("/:id", update_user);
-router.delete(":id", delete_user);
+router.delete("/:id", delete_user);
+router.post("/akougnon", gen);
 
 
 module.exports = router
