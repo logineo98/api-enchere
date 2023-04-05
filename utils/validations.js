@@ -5,16 +5,14 @@ const { isEmpty } = require("./functions");
 exports.login_validation = async (req, res, next) => {
     try {
         let errors;
-        const regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        const { email, password } = req.body
+        const regexPhone = /(^(\+223|00223)?[5-9]{1}[0-9]{7}$)/;
 
-        const user = await UserModel.findOne({ email })
+        const { phone, password } = req.body
 
-        if (email && !regexEmail.test(email)) errors = "Format e-mail incorrect.";
-        if (isEmpty(email)) errors = "Email ou mot de passe incorrect.";
-        if (!isEmpty(user)) errors = "Cet email est déjà utilisé."
-        if (isEmpty(password)) errors = "Email ou mot de passe incorrect.";
-        if (password.length < 6) errors = "Mot de passe trop court."
+        if (phone && !regexPhone.test(phone)) errors = "Format du numéro incorrect.";
+        if (isEmpty(phone)) errors = "Numéro ou mot de passe incorrect.";
+        if (isEmpty(password)) errors = "Numéro ou mot de passe incorrect.";
+        if (!isEmpty(password) && password.length < 6) errors = "Mot de passe trop court."
 
         req.error = errors;
         next()

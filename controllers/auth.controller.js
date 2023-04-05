@@ -36,19 +36,19 @@ exports.profile = async (req, res) => {
 
 }
 
-//login user by his email and password
-//we seach user by his email then match, we compare his password with the searched one password
+//login user by his phone number and password
+//we seach user by his phone number then match, we compare his password with the searched one password
 //if password also matched, we return his token and his datas
 //by default his token expire in 3 hours
 exports.login = async (req, res) => {
     try {
-        const { email, password } = req.body
+        const { phone, password } = req.body
 
         const error = req.error;
         if (!isEmpty(error)) return res.status(401).send({ message: error });
 
         //find user by e-mail
-        const user = await UserModel.findOne({ email })
+        const user = await UserModel.findOne({ phone })
 
         //if user doesn't exist
         if (isEmpty(user)) return res.status(401).json({ message: "E-mail ou mot de passe incorrect." })
