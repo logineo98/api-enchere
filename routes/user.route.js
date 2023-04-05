@@ -1,4 +1,4 @@
-const { login, register, checking, profile, licenseActivation } = require('../controllers/auth.controller');
+const { login, register, checking, profile, licenseActivation, test } = require('../controllers/auth.controller');
 const { get_user, get_users, update_user, delete_user } = require('../controllers/user.controller');
 const { authenticate } = require('../middleware/middleware');
 const { login_validation, licenseActivation_validation } = require('../utils/validations');

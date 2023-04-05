@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt')
 const twilio = require('twilio')
 
 
+
 //check if got token is valid then send true else send false
 exports.checking = async (req, res) => {
     try {
@@ -49,7 +50,7 @@ exports.login = async (req, res) => {
         const error = req.error
         if (!isEmpty(error)) return res.status(401).send({ message: error })
 
-        //find user by e-mail
+        //find user by phone number
         const user = await UserModel.findOne({ phone }).select("-password")
 
         //if user doesn't exist
@@ -168,4 +169,6 @@ exports.register = (req, res) => {
         })
         .catch((error) => res.status(500).json({ message: error.message }))
 }
+
+
 
