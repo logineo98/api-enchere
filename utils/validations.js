@@ -1,3 +1,4 @@
+const { isValidObjectId } = require("mongoose");
 const UserModel = require("../models/user.model");
 const { isEmpty } = require("./functions");
 
@@ -19,4 +20,20 @@ exports.login_validation = async (req, res, next) => {
     } catch (error) {
         res.status(500).json({ message: error.message })
     }
+}
+
+exports.licenseActivation_validation = async (req, res, next) => {
+    try {
+        let errors;
+        const { userID, licenseKey } = req.body
+
+        if (!isValidObjectId(userID)) errors = "ID fourni est incorrect ou invalid.";
+        if (isEmpty(licenseKey)) errors = "Code non renseigner.";
+
+        req.error = errors
+        next()
+    } catch (error) {
+        res.status(500).send({ message: error.message });
+    }
+
 }

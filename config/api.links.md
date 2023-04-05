@@ -7,6 +7,7 @@ register---> POST /user
 update-----> PUT /user/${id}
 delete-----> DELETE /user/${id}
 getByID----> GET /user/${id}
-getAll-----> GET /user
+getAll-----> GET /user  
+active License-----> POST /user/activation-license
 
 ###### ENCHERE
