@@ -136,8 +136,6 @@ exports.register = (req, res) => {
                                 })
                                 .catch((error) => res.status(500).json({ message: error.message }))
                         })
-
-
                     })
                     .catch((error) => res.status(500).json({ message: error.message }))
             } else {
@@ -161,8 +159,6 @@ exports.register = (req, res) => {
                                 })
                                 .catch((error) => res.status(500).json({ message: error.message }))
                         })
-
-
                     })
                     .catch((error) => res.status(500).json({ message: error.message }))
             }
