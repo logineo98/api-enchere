@@ -67,15 +67,6 @@ exports.delete_user = async (req, res) => {
 
 }
 
-exports.send_invitation = async (req, res) => {
-    try {
-
-    } catch (error) {
-        res.status(500).send({ message: error.message });
-    }
-
-}
-
 exports.send_invitation = (req, res) => {
     if (!isValidObjectId(req.params.id)) {
         return res.status(400).json({ message: "Désolé l'identifiant de l'utilisateur n'est pas correct !" });
