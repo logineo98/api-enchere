@@ -58,3 +58,17 @@ exports.update_user_validation = async (req, res, next) => {
     }
 
 }
+
+exports.send_invitation_validation = (friend_phone) => {
+    const initialError = { friend_phone: "" }
+    let error = initialError
+    regex
+
+    if (!friend_phone || friend_phone.trim() === "") {
+        error = { ...error, friend_phone: "Désolé, veuillez renseigner un numéro de téléphone !" }
+    } else if (regex.phone.test(friend_phone.trim()) === false) {
+        error = { ...error, friend_phone: "Désolé, le numéro de téléphone n'est pas de format valide !" }
+    }
+
+    return { error, initialError }
+}

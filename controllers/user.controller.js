@@ -1,7 +1,8 @@
 const { isValidObjectId } = require("mongoose");
 const UserModel = require("../models/user.model");
-const { isEmpty } = require("../utils/functions");
+const { isEmpty, sendSMS } = require("../utils/functions");
 const bcrypt = require('bcrypt');
+const { send_invitation_validation } = require("../utils/validations");
 
 //update user's info and password if exist
 //@return "user's data" and "success message"
@@ -64,11 +65,28 @@ exports.delete_user = async (req, res) => {
     } catch (error) {
         res.status(500).send({ message: error });
     }
-
 }
 
 exports.send_invitation = (req, res) => {
     if (!isValidObjectId(req.params.id)) {
         return res.status(400).json({ message: "Désolé l'identifiant de l'utilisateur n'est pas correct !" });
+    }
+
+    const { friend_phone } = req.body
+
+    const { error, initialError } = send_invitation_validation(friend_phone)
+
+    if (error !== initialError) {
+        return res.status(400).json({ message: error })
+    } else {
+        UserModel.findByIdAndUpdate(req.params.id, { $addToSet: { invitations: friend_phone } }, { new: true })
+            .then(user => {
+                sendSMS("0022379364385", "0022379364385", "Lien de Play Store")
+                    .then(sms => {
+                        res.send({ response: user, message: "L'invitation a bien été envoyé !", sms })
+                    })
+                    .catch((error) => res.status(500).json({ message: error.message }))
+            })
+            .catch(error => res.status(500).json({ message: error.message }))
     }
 }
