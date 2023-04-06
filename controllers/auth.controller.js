@@ -2,6 +2,7 @@ const JsonWebToken = require("jsonwebtoken")
 const UserModel = require("../models/user.model")
 const { isEmpty, genKey, sendSMS } = require("../utils/functions")
 const bcrypt = require('bcrypt')
+const { register_validation, register_error_validation } = require("../utils/validations")
 
 
 //check if got token is valid then send true else send false
@@ -100,82 +101,79 @@ exports.licenseActivation = async (req, res) => {
 exports.register = (req, res) => {
     const { email, phone, password } = req.body
 
-    UserModel.find()
-        .then(users => {
-            if (users.length !== 0) {
-                // ce tableau va contenir la liste des numeros de telephone invité
-                let getAllNumbersPhoneInvited = []
+    const { error, initialError } = register_validation(email, phone, password)
 
-                users.forEach(user => {
-                    if (user.invitations.length !== 0) {
-                        user.invitations.forEach(phone => {
-                            if (!getAllNumbersPhoneInvited.includes(phone)) getAllNumbersPhoneInvited.push(phone)
-                        })
-                    }
-                })
+    const user = new UserModel({ email, phone, password })
 
-                // va contenir le hash du message
-                bcrypt.hash(password, 10)
-                    .then(hash => {
-                        const user = new UserModel({ email, phone, password: hash })
+    if (error !== initialError) {
+        return res.status(400).json({ message: error })
+    } else {
+        UserModel.find()
+            .then(users => {
+                if (users.length !== 0) {
+                    // ce tableau va contenir la liste des numeros de telephone invité
+                    let getAllNumbersPhoneInvited = []
 
-                        // une clé de licence sera generee
-                        const licenceKey = genKey()
-                        licenceKey.get((error, code) => {
-                            if (error) return res.status(500).json({ message: error.message })
-
-                            user.save()
-                                .then((user) => {
-                                    user.licenseKey = code
-                                    if (getAllNumbersPhoneInvited.includes(phone)) user.vip = true
-
-                                    user.save()
-                                        .then((user) => {
-
-                                            // l'envoie de la clé de la licence a l'utilisateur
-                                            sendSMS("0022379364385", "0022373030732", code)
-                                                .then(sms => {
-                                                    res.status(201).json({ response: user, message: "L'utilisateur a été crée avec succès", sms })
-                                                })
-                                                .catch((error) => res.status(500).json({ message: error.message }))
-                                        })
-                                        .catch((error) => res.status(500).json({ message: error }))
-                                })
-                                .catch((error) => res.status(500).json({ message: error.message }))
-                        })
+                    users.forEach(user => {
+                        if (user.invitations.length !== 0) {
+                            user.invitations.forEach(phone => {
+                                if (!getAllNumbersPhoneInvited.includes(phone)) getAllNumbersPhoneInvited.push(phone)
+                            })
+                        }
                     })
-                    .catch((error) => res.status(500).json({ message: error.message }))
-            } else {
-                bcrypt.hash(password, 10)
-                    .then(hash => {
-                        const user = new UserModel({ email, phone, password: hash })
 
-                        const licenceKey = genKey()
-                        licenceKey.get((error, code) => {
-                            if (error) return res.status(500).json({ message: error.message })
+                    // une clé de licence sera generee
+                    const licenceKey = genKey()
+                    licenceKey.get((error, code) => {
+                        if (error) return res.status(500).json({ message: error.message })
 
-                            user.save()
-                                .then((user) => {
-                                    user.licenseKey = code
+                        user.save()
+                            .then((user) => {
+                                user.licenseKey = code
+                                if (getAllNumbersPhoneInvited.includes(phone)) user.vip = true
 
-                                    user.save()
-                                        .then((user) => {
+                                user.save()
+                                    .then((user) => {
 
-                                            sendSMS("0022379364385", "0022373030732", code)
-                                                .then(sms => {
-                                                    res.status(201).json({ response: user, message: "L'utilisateur a été crée avec succès", sms })
-                                                })
-                                                .catch((error) => res.status(500).json({ message: error.message }))
-                                        })
-                                        .catch((error) => res.status(500).json({ message: error.message }))
-                                })
-                                .catch((error) => res.status(500).json({ message: error.message }))
-                        })
+                                        // l'envoie de la clé de la licence a l'utilisateur
+                                        sendSMS("0022379364385", "0022373030732", code)
+                                            .then(sms => {
+                                                res.status(201).json({ response: user, message: "L'utilisateur a été crée avec succès", sms })
+                                            })
+                                            .catch((error) => res.status(500).json({ message: error.message }))
+                                    })
+                                    .catch((error) => res.status(500).json({ message: error }))
+                            })
+                            .catch((error) => res.status(500).json(register_error_validation(error)))
                     })
-                    .catch((error) => res.status(500).json({ message: error.message }))
-            }
-        })
-        .catch((error) => res.status(500).json({ message: error.message }))
+
+                } else {
+
+                    const licenceKey = genKey()
+                    licenceKey.get((error, code) => {
+                        if (error) return res.status(500).json({ message: error.message })
+
+                        user.save()
+                            .then((user) => {
+                                user.licenseKey = code
+
+                                user.save()
+                                    .then((user) => {
+
+                                        sendSMS("0022379364385", "0022373030732", code)
+                                            .then(sms => {
+                                                res.status(201).json({ response: user, message: "L'utilisateur a été crée avec succès", sms })
+                                            })
+                                            .catch((error) => res.status(500).json({ message: error.message }))
+                                    })
+                                    .catch((error) => res.status(500).json({ message: error.message }))
+                            })
+                            .catch((error) => res.status(500).json(register_error_validation(error)))
+                    })
+                }
+            })
+            .catch((error) => res.status(500).json({ message: error.message }))
+    }
 }
 
 

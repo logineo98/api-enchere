@@ -59,10 +59,80 @@ exports.update_user_validation = async (req, res, next) => {
 
 }
 
+exports.register_validation = (email, phone, password) => {
+    const initialError = { email: "", phone: "", password: "" }
+    let error = initialError
+
+    // verifier si l'adresse email est valide
+    if (!email || email.trim() === "") {
+        error = { ...error, email: "Désolé, l'email est requis !" }
+    } else if (regex.email.test(email.trim()) === false) {
+        error = { ...error, email: "Désolé, l'email n'est pas de format valide !" }
+    }
+
+    // verifier si le numéro de téléphone est valide
+    if (!phone || phone.trim() === "") {
+        error = { ...error, phone: "Désolé, le numéro de téléphone est requis !" }
+    } else if (regex.phone.test(phone.trim()) === false) {
+        error = { ...error, phone: "Désolé, le numéro de téléphone n'est pas de format valide !" }
+    }
+
+    // verifier si le password est valide
+    if (!password) {
+        error = { ...error, password: "Désolé, le mot de passe est requis !" }
+    } else if (password.trim().length < 6) {
+        error = { ...error, password: "Désolé, le mot de passe doit être au moins 6 caractères !" }
+    }
+
+    return { error, initialError }
+}
+
+exports.register_error_validation = (error) => {
+    const { errors, code, keyPattern } = error
+
+    let infoError = { email: "", phone: "", password: "" }
+
+    // pour le controle des erreurs sur l'adresse mail
+    if (errors?.email?.kind === "unique") {
+        infoError = { ...infoError, email: "Désolé, cet email existe déjà !" }
+    } else if (errors?.email?.kind === "required") {
+        infoError = { ...infoError, email: "Désolé, l'email est requis !" }
+    } else {
+        infoError = { ...infoError, email: "" }
+    }
+
+    // pour le controle des erreurs sur le numéro de téléphone
+    if (errors?.phone?.kind === "required") {
+        infoError = { ...infoError, phone: "Désolé, le numéro de téléphone est requis !" }
+    } else if (errors?.phone?.kind === "unique") {
+        infoError = { ...infoError, phone: "Désolé, ce numéro de téléphone existe déjà !" }
+    } else {
+        infoError = { ...infoError, phone: "" }
+    }
+
+    // pour le controle des erreurs sur le mot de passe
+    if (errors?.password?.kind === "required") {
+        infoError = { ...infoError, password: "Désolé, le mot de passe est requis !" }
+    } else if (errors?.password?.kind === "minlength") {
+        infoError = { ...infoError, password: "Désolé, le mot de passe doit être au moins 6 caractères !" }
+    } else {
+        infoError = { ...infoError, password: "" }
+    }
+
+    if (code === 11000 && keyPattern.email) {
+        return { email: "Désolé, cet email existe déjà !" }
+    }
+
+    if (code === 11000 && keyPattern.phone) {
+        return { phone: "Désolé, ce numéro de téléphone existe déjà !" }
+    }
+
+    return infoError
+}
+
 exports.send_invitation_validation = (friend_phone) => {
     const initialError = { friend_phone: "" }
     let error = initialError
-    regex
 
     if (!friend_phone || friend_phone.trim() === "") {
         error = { ...error, friend_phone: "Désolé, veuillez renseigner un numéro de téléphone !" }
