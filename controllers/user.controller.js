@@ -1,3 +1,4 @@
+const { isValidObjectId } = require("mongoose");
 const UserModel = require("../models/user.model");
 const { isEmpty } = require("../utils/functions");
 const bcrypt = require('bcrypt');
@@ -51,9 +52,14 @@ exports.get_users = async (req, res) => {
 
 exports.delete_user = async (req, res) => {
     try {
+        if (isEmpty(req.params.id) || !isValidObjectId(req.params.id)) throw "Identifiant utilisateur invalide ou incorrect."
 
+        const user = await UserModel.findByIdAndDelete(req.params.id)
+        if (isEmpty(user)) throw "Echec de suppression"
+
+        res.status(200).json({ response: user, message: "Utilisateur supprimé avec succès." })
     } catch (error) {
-        res.status(500).send({ message: error.message });
+        res.status(500).send({ message: error });
     }
 
 }
