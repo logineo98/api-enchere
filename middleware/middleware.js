@@ -10,19 +10,23 @@ exports.authenticate = async (req, res, next) => {
         let token = req.header("token");
 
         if (isEmpty(token))
-            return res.status(404).json({ message: "authentification impossible" });
+            throw "authentification impossible";
 
         const data = JsonWebToken.verify(token, process.env.JWT_SECRET);
 
+        if ((req.body.hostID && req.body.hostID !== data.id) || (req.params.hostID && req.params.hostID !== data.id)) {
+            throw "Désolé, vous n'êtes la personne autorisée à effectuer cette action !"
+        }
+
         if (isEmpty(data.id))
-            res.status(404).json({ message: "code d'authentification expiré" });
+            throw "Delais d'authentification expiré";
 
         const user = await UserModel.findById(data.id);
-        if (isEmpty(user)) res.status(401).json({ message: "echec d'authentification" });
+        if (isEmpty(user)) throw "Echec d'authentification";
 
         req.id = user;
         next();
     } catch (error) {
-        res.status(401).json({ message: "Authentification requise." });
+        res.status(401).json({ message: error });
     }
 };

@@ -3,6 +3,7 @@ const UserModel = require("../models/user.model")
 const { isEmpty, genKey, sendSMS } = require("../utils/functions")
 const bcrypt = require('bcrypt')
 
+
 //check if got token is valid then send true else send false
 exports.checking = async (req, res) => {
     try {
@@ -39,6 +40,7 @@ exports.profile = async (req, res) => {
 //we search user by his phone number then match, we compare his password with the searched one password
 //if password also matched, we return his token and his datas
 //by default his token expire in 3 hours
+//----------- @return "logged user's data" and "token" ------------------
 exports.login = async (req, res) => {
     try {
         const { phone, password } = req.body
@@ -47,7 +49,7 @@ exports.login = async (req, res) => {
         if (!isEmpty(error)) return res.status(401).send({ message: error })
 
         //find user by phone number
-        const user = await UserModel.findOne({ phone }).select("-password")
+        const user = await UserModel.findOne({ phone })
 
         //if user doesn't exist
         if (isEmpty(user)) return res.status(401).json({ message: "E-mail ou mot de passe incorrect." })
@@ -71,6 +73,7 @@ exports.login = async (req, res) => {
 
 //when user is logged we retrieve the licenseKey from his datas and compare it with his input licenseKey
 //if it matches, we update his license_status to true else we throw errors
+//----------- @return "logged user's data" ------------------
 exports.licenseActivation = async (req, res) => {
     try {
         const { licenseKey, userID } = req.body

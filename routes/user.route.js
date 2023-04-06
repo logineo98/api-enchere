@@ -8,14 +8,14 @@ const router = require('express').Router()
 router.get("/get/profile", authenticate, profile)
 router.post("/checking", checking)
 router.post("/login", login_validation, login)
-router.post("/activation-license", licenseActivation_validation, licenseActivation)
+router.post("/activation-license", authenticate, licenseActivation_validation, licenseActivation)
 
-router.post("/", register)
-router.get("/:id", get_user)
-router.get("/", get_users)
-router.put("/:id", update_user)
-router.delete("/:id", delete_user)
+router.post("/", authenticate, register);
+router.get("/:id/:hostID", authenticate, get_user);
+router.get("/:hostID", authenticate, get_users);
+router.put("/:id/:hostID", update_user_validation, authenticate, update_user);
+router.delete("/:id/:hostID", authenticate, delete_user);
 
-router.patch("/send-invitation/:id", send_invitation)
+router.patch("/send-invitation/:id/:hostID", authenticate, send_invitation)
 
 module.exports = router
