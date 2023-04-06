@@ -16,6 +16,6 @@ router.get("/:hostID", authenticate, get_users);
 router.put("/:id/:hostID", update_user_validation, authenticate, update_user);
 router.delete("/:id/:hostID", authenticate, delete_user);
 
-router.patch("/send-invitation/:id", send_invitation)
+router.patch("/send-invitation/:id/:hostID", authenticate, send_invitation)
 
 module.exports = router

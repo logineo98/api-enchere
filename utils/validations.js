@@ -1,16 +1,14 @@
 const { isValidObjectId } = require("mongoose");
 const { isEmpty } = require("./functions");
 const UserModel = require("../models/user.model");
+const { regex } = require("./constants");
 
 exports.login_validation = async (req, res, next) => {
     try {
         let errors;
-        const regexPhone = /(^(\+223|00223)?[5-9]{1}[0-9]{7}$)/;
-
         const { phone, password } = req.body
 
-
-        if (phone && !regexPhone.test(phone)) errors = "Format du numéro incorrect.";
+        if (phone && !regex.phone.test(phone)) errors = "Format du numéro incorrect.";
         if (isEmpty(phone)) errors = "Numéro ou mot de passe incorrect.";
         if (isEmpty(password)) errors = "Numéro ou mot de passe incorrect.";
         if (!isEmpty(password) && password.length < 6) errors = "Mot de passe trop court."

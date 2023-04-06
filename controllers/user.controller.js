@@ -3,6 +3,8 @@ const UserModel = require("../models/user.model");
 const { isEmpty } = require("../utils/functions");
 const bcrypt = require('bcrypt');
 
+//update user's info and password if exist
+//@return "user's data" and "success message"
 exports.update_user = async (req, res) => {
     try {
         const error = req.error
@@ -24,6 +26,7 @@ exports.update_user = async (req, res) => {
 }
 
 //retrieve user's datas by his ID
+//------------ @return finding "user's data" and "success message" -----------------
 exports.get_user = async (req, res) => {
     try {
         const user = await UserModel.findById(req.params.id).select("-password")
@@ -36,6 +39,7 @@ exports.get_user = async (req, res) => {
 }
 
 //retrieve users datas
+//----------------- @return an "Array of users" and "success message" -----------------
 exports.get_users = async (req, res) => {
     try {
         const user = await UserModel.find().select("-password")
@@ -49,7 +53,8 @@ exports.get_users = async (req, res) => {
     }
 }
 
-
+//verify if user id exist then delete that user else we throw errors
+//----------------- @return "user's datas" and "success message" -----------------
 exports.delete_user = async (req, res) => {
     try {
         if (isEmpty(req.params.id) || !isValidObjectId(req.params.id)) throw "Identifiant utilisateur invalide ou incorrect."
