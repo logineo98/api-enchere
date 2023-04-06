@@ -12,6 +12,7 @@ exports.authenticate = async (req, res, next) => {
         if (isEmpty(token))
             throw "authentification impossible";
 
+
         const data = JsonWebToken.verify(token, process.env.JWT_SECRET);
 
         if ((req.body.hostID && req.body.hostID !== data.id) || (req.params.hostID && req.params.hostID !== data.id)) {

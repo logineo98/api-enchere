@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt')
 const { register_validation, register_error_validation } = require("../utils/validations")
 
 
+//----------- @return boolean depending on whether the user token is valid or not ------------------
 //check if got token is valid then send true else send false
 exports.checking = async (req, res) => {
     try {
@@ -22,29 +23,30 @@ exports.checking = async (req, res) => {
     }
 }
 
+//----------- @return "logged user's profile data" ------------------
 //get user profile by checking token validity, if token is valid we get user's id from req using middleware
 //then we get user's data through his model
 exports.profile = async (req, res) => {
     try {
         const user = await UserModel.findById(req.id).select("-password")
 
-        if (isEmpty(user)) return res.status(401).send({ message: "Erreur d'authentification" })
+        if (isEmpty(user)) throw "Erreur d'authentification"
 
         res.status(200).send({ response: user, message: "Profile utilisateur recupéré avec succès." })
     } catch (error) {
-        res.status(500).send({ message: error.message })
+        res.status(500).send({ message: error })
     }
 
 }
 
+//----------- @return "logged user's data" and "token" ------------------
 //login user by his phone number and password
 //we search user by his phone number then match, we compare his password with the searched one password
 //if password also matched, we return his token and his datas
 //by default his token expire in 3 hours
-//----------- @return "logged user's data" and "token" ------------------
 exports.login = async (req, res) => {
     try {
-        const { phone, password } = req.body
+        const { phone } = req.body
 
         const error = req.error
         if (!isEmpty(error)) return res.status(401).send({ message: error })
@@ -56,15 +58,17 @@ exports.login = async (req, res) => {
         if (isEmpty(user)) return res.status(401).json({ message: "E-mail ou mot de passe incorrect." })
 
         //check if password is right
-        const passwordMatched = await bcrypt.compare(password, user.password)
+        const passwordMatched = await bcrypt.compare(req.body.password, user.password)
         if (!passwordMatched)
             return res.status(401).json({ message: `E-mail ou mot de passe est incorrect.` })
 
         // Create token JWT who expired in 3hours
         const token = JsonWebToken.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "3h" })
 
+        let { password, ...rest } = user._doc
+
         // Retour de la réponse avec le token et l'employé connecté
-        res.status(200).json({ token, response: user })
+        res.status(200).json({ token, response: rest })
 
     } catch (error) {
         res.status(500).send({ message: error.message })
@@ -72,9 +76,9 @@ exports.login = async (req, res) => {
 
 }
 
+//----------- @return "logged user's data" ------------------
 //when user is logged we retrieve the licenseKey from his datas and compare it with his input licenseKey
 //if it matches, we update his license_status to true else we throw errors
-//----------- @return "logged user's data" ------------------
 exports.licenseActivation = async (req, res) => {
     try {
         const { licenseKey, userID } = req.body

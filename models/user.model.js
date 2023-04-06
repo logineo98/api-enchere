@@ -13,6 +13,7 @@ const user_sch = new mongoose.Schema({
     invitations: [String],
     licenseKey: { type: String },
     license_status: { type: Boolean, default: false },
+    forgot_password_token: { type: String },
 }, { timestamps: true })
 
 // play function before save into display: 'block',

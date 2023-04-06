@@ -35,6 +35,46 @@ exports.compareTwoArray = (tableau1, tableau2) => {
 
 exports.isEmpty = (value) => value === undefined || value === null || (typeof value === "object" && Object.keys(value).length === 0) || (typeof value === "string" && value.trim().length === 0);
 
+exports.isEqual = (value1, value2) => {
+    // Vérifier le type des valeurs
+    if (typeof value1 !== typeof value2) {
+        return false;
+    }
+
+    // Vérifier si les deux valeurs sont des tableaux
+    if (Array.isArray(value1) && Array.isArray(value2)) {
+        // Vérifier si les deux tableaux ont la même longueur
+        if (value1.length !== value2.length) {
+            return false;
+        }
+
+        // Comparer chaque élément des tableaux
+        return value1.every((value, index) => isEqual(value, value2[index]));
+    }
+
+    // Vérifier si les deux valeurs sont des objets
+    if (typeof value1 === 'object' && typeof value2 === 'object') {
+        // Vérifier si les deux objets ont la même quantité de propriétés
+        if (Object.keys(value1).length !== Object.keys(value2).length) {
+            return false;
+        }
+
+        // Comparer chaque propriété des objets
+        for (let prop in value1) {
+            if (!isEqual(value1[prop], value2[prop])) {
+                return false;
+            }
+        }
+
+        // Si toutes les propriétés sont égales, les objets sont égaux
+        return true;
+    }
+
+    // Comparer les valeurs directement
+    return value1 === value2;
+}
+
+
 exports.genLicenseKey = (user) => {
     var licenseData = { info: user, prodCode: "LEN100120", appVersion: "1.5", osType: "IOS8" }
 
@@ -57,6 +97,15 @@ exports.genKey = (length, group) => {
 
     return code;
 }
+
+
+exports.genRandomNums = (size) => {
+    let min = Math.pow(10, size - 1);
+    let max = Math.pow(10, size) - 1;
+    let token = Math.floor(min + Math.random() * (max - min + 1));
+    return token.toString();
+}
+
 
 //use of function 
 //const resp = sendSMS("0022379364385", "0022379364385", "message test for sms")
