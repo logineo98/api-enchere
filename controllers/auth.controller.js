@@ -3,6 +3,7 @@ const UserModel = require("../models/user.model")
 const { isEmpty, genKey, sendSMS } = require("../utils/functions")
 const bcrypt = require('bcrypt')
 
+
 //check if got token is valid then send true else send false
 exports.checking = async (req, res) => {
     try {
@@ -47,7 +48,7 @@ exports.login = async (req, res) => {
         if (!isEmpty(error)) return res.status(401).send({ message: error })
 
         //find user by phone number
-        const user = await UserModel.findOne({ phone }).select("-password")
+        const user = await UserModel.findOne({ phone })
 
         //if user doesn't exist
         if (isEmpty(user)) return res.status(401).json({ message: "E-mail ou mot de passe incorrect." })
