@@ -59,16 +59,9 @@ exports.update_user_validation = async (req, res, next) => {
 
 }
 
-exports.register_validation = (email, phone, password) => {
-    const initialError = { email: "", phone: "", password: "" }
+exports.register_validation = (phone, password) => {
+    const initialError = { phone: "", password: "" }
     let error = initialError
-
-    // verifier si l'adresse email est valide
-    if (!email || email.trim() === "") {
-        error = { ...error, email: "Désolé, l'email est requis !" }
-    } else if (regex.email.test(email.trim()) === false) {
-        error = { ...error, email: "Désolé, l'email n'est pas de format valide !" }
-    }
 
     // verifier si le numéro de téléphone est valide
     if (!phone || phone.trim() === "") {
@@ -90,22 +83,11 @@ exports.register_validation = (email, phone, password) => {
 exports.register_error_validation = (error) => {
     const { errors, code, keyPattern } = error
 
-    let infoError = { email: "", phone: "", password: "" }
-
-    // pour le controle des erreurs sur l'adresse mail
-    if (errors?.email?.kind === "unique") {
-        infoError = { ...infoError, email: "Désolé, cet email existe déjà !" }
-    } else if (errors?.email?.kind === "required") {
-        infoError = { ...infoError, email: "Désolé, l'email est requis !" }
-    } else {
-        infoError = { ...infoError, email: "" }
-    }
+    let infoError = { phone: "", password: "" }
 
     // pour le controle des erreurs sur le numéro de téléphone
     if (errors?.phone?.kind === "required") {
         infoError = { ...infoError, phone: "Désolé, le numéro de téléphone est requis !" }
-    } else if (errors?.phone?.kind === "unique") {
-        infoError = { ...infoError, phone: "Désolé, ce numéro de téléphone existe déjà !" }
     } else {
         infoError = { ...infoError, phone: "" }
     }
@@ -117,10 +99,6 @@ exports.register_error_validation = (error) => {
         infoError = { ...infoError, password: "Désolé, le mot de passe doit être au moins 6 caractères !" }
     } else {
         infoError = { ...infoError, password: "" }
-    }
-
-    if (code === 11000 && keyPattern.email) {
-        return { email: "Désolé, cet email existe déjà !" }
     }
 
     if (code === 11000 && keyPattern.phone) {

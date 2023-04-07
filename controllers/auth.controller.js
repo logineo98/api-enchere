@@ -103,16 +103,16 @@ exports.licenseActivation = async (req, res) => {
 }
 
 exports.register = (req, res) => {
-    const { email, phone, password } = req.body
+    const { phone, password } = req.body
 
-    const { error, initialError } = register_validation(email, phone, password)
+    const { error, initialError } = register_validation(phone, password)
 
-    const user = new UserModel({ email, phone, password })
+    const user = new UserModel({ phone, password })
 
     if (error !== initialError) {
         return res.status(400).json({ message: error })
     } else {
-        UserModel.find()
+        UserModel.find({ vip: true })
             .then(users => {
                 if (users.length !== 0) {
                     // ce tableau va contenir la liste des numeros de telephone invité
@@ -152,7 +152,6 @@ exports.register = (req, res) => {
                     })
 
                 } else {
-
                     const licenceKey = genKey()
                     licenceKey.get((error, code) => {
                         if (error) return res.status(500).json({ message: error.message })
@@ -164,7 +163,7 @@ exports.register = (req, res) => {
                                 user.save()
                                     .then((user) => {
 
-                                        sendSMS("0022379364385", "0022373030732", code)
+                                        sendSMS("0022373030732", "0022373030732", code)
                                             .then(sms => {
                                                 res.status(201).json({ response: user, message: "L'utilisateur a été crée avec succès", sms })
                                             })
@@ -179,6 +178,3 @@ exports.register = (req, res) => {
             .catch((error) => res.status(500).json({ message: error.message }))
     }
 }
-
-
-
