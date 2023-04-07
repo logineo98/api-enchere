@@ -4,7 +4,7 @@ const enchere_sch = new mongoose.Schema({
     sellerID: { type: mongoose.Types.ObjectId, ref: "User", required: true },
     title: { type: String, trim: true, required: true },
     description: { type: String, trim: true, required: true },
-    categories: [String],
+    categories: [{ type: String, required: true }],
     medias: [String],
     started_price: { type: Number, required: true },
     increase_price: { type: Number, required: true },

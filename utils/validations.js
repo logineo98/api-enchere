@@ -1,7 +1,12 @@
 const { isValidObjectId } = require("mongoose");
-const { isEmpty } = require("./functions");
+const { isEmpty, isEqual } = require("./functions");
 const UserModel = require("../models/user.model");
 const { regex } = require("./constants");
+
+
+
+
+//------------------------ USER ----------------------------------------------------------
 
 exports.login_validation = async (req, res, next) => {
     try {
@@ -119,4 +124,41 @@ exports.send_invitation_validation = (friend_phone) => {
     }
 
     return { error, initialError }
+}
+
+
+//------------------------ ENCHERE ----------------------------------------------------------
+exports.create_enchere_validation = async (req, res, next) => {
+    try {
+        let empty_error = { title: "", description: "", started_price: "", increase_price: "", categories: "", enchere_type: "" }
+        let errors = empty_error
+
+        let { sellerID, title, description, started_price, increase_price, categories, enchere_type, expiration_time } = req.body
+
+
+        if (isEmpty(sellerID)) throw "Identifiant utilisateur invalide ou incorrect."
+
+        const user = await UserModel.findById(sellerID)
+
+        if (!isEmpty(user) && user.vip === true && enchere_type === "") errors = { ...errors, enchere_type: "Veuillez definire le type d'enchere pour votre article." }
+        if (!isEmpty(user) && user.vip === true && enchere_type !== "" && (enchere_type !== "public" && enchere_type !== "privée")) errors = { ...errors, enchere_type: "L'enchere est soit public ou privée." }
+        if (isEmpty(title)) errors = { ...errors, title: "Veuillez inserer le titre de l'article." }
+        if (isEmpty(description)) errors = { ...errors, description: "Veuillez inserer la description de l'article." }
+
+        if (isEmpty(expiration_time)) errors = { ...errors, description: "Veuillez inserer la durée de l'enchère" }
+
+
+
+        if (isEmpty(started_price)) errors = { ...errors, started_price: "Veuillez inserer le prix de demarage de l'enchère." }
+        else if (!isEmpty(started_price) && started_price < 500) errors = { ...errors, started_price: "Le prix de demarage de l'enchère doit être superieur ou égale à 500 fcfa." }
+
+        if (isEmpty(increase_price)) errors = { ...errors, increase_price: "Veuillez inserer le prix d'incrementation de l'enchère." }
+        if (isEmpty(categories)) errors = { ...errors, categories: "Veuillez choisir au moins une categorie pour votre article." }
+
+        if (errors !== empty_error) throw errors
+        next()
+    } catch (error) {
+        res.status(500).json({ message: error })
+    }
+
 }

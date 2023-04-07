@@ -1,6 +1,7 @@
 const JsonWebToken = require("jsonwebtoken");
 const UserModel = require("../models/user.model");
 const { isEmpty } = require("../utils/functions");
+const multer = require("multer");
 
 
 
@@ -31,3 +32,18 @@ exports.authenticate = async (req, res, next) => {
         res.status(401).json({ message: error });
     }
 };
+
+
+// configure storage for uploaded files
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/')
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        cb(null, file.fieldname + '-' + uniqueSuffix + '.' + file.mimetype.split('/')[1])
+    }
+})
+
+// create multer instance with storage configuration
+exports.upload = multer({ storage: storage });
