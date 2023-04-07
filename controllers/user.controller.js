@@ -83,13 +83,35 @@ exports.send_invitation = (req, res) => {
     if (error !== initialError) {
         return res.status(400).json({ message: error })
     } else {
-        UserModel.findByIdAndUpdate(req.params.id, { $addToSet: { invitations: friend_phone } }, { new: true })
+        UserModel.findOne({ phone: friend_phone })
             .then(user => {
-                sendSMS("0022379364385", "0022379364385", "Lien de Play Store")
-                    .then(sms => {
-                        res.send({ response: user, message: "L'invitation a bien été envoyé !", sms })
-                    })
-                    .catch((error) => res.status(500).json({ message: error.message }))
+                // ici on verifiera si le numero d'invitation existe deja il sera transformé en vip
+                if (user) {
+                    user.updateOne({ $set: { vip: true } }, { new: true })
+                        .then(() => {
+                            UserModel.findByIdAndUpdate(req.params.id, { $addToSet: { invitations: friend_phone } }, { new: true })
+                                .then(user => {
+                                    sendSMS("0022379364385", "0022379364385", "Lien de Play Store")
+                                        .then(sms => {
+                                            res.send({ response: user, message: "L'invitation a bien été envoyé !", sms })
+                                        })
+                                        .catch((error) => res.status(500).json({ message: error.message }))
+                                })
+                                .catch(error => res.status(500).json({ message: error.message }))
+                        })
+                        .catch(error => res.status(500).json({ message: error.message }))
+                } else {
+                    // sinon l'expediteur conservera juste le numero d'invitation dans sa liste d'invitation
+                    UserModel.findByIdAndUpdate(req.params.id, { $addToSet: { invitations: friend_phone } }, { new: true })
+                        .then(user => {
+                            sendSMS("0022379364385", "0022379364385", "Lien de Play Store")
+                                .then(sms => {
+                                    res.send({ response: user, message: "L'invitation a bien été envoyé !", sms })
+                                })
+                                .catch((error) => res.status(500).json({ message: error.message }))
+                        })
+                        .catch(error => res.status(500).json({ message: error.message }))
+                }
             })
             .catch(error => res.status(500).json({ message: error.message }))
     }

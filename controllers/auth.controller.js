@@ -58,7 +58,7 @@ exports.login = async (req, res) => {
         if (isEmpty(user)) return res.status(401).json({ message: "E-mail ou mot de passe incorrect." })
 
         //check if password is right
-        const passwordMatched = await bcrypt.compare(req.body.password, user.password)
+        const passwordMatched = bcrypt.compare(req.body.password, user.password)
         if (!passwordMatched)
             return res.status(401).json({ message: `E-mail ou mot de passe est incorrect.` })
 
