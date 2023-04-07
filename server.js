@@ -13,6 +13,7 @@ app.use(cors())
 
 //use of routers here
 app.use("/api/user", require("./routes/user.route"))
+app.use("/api/enchere", require("./routes/enchere.route"))
 
 
 const port = process.env.PORT || 5000
