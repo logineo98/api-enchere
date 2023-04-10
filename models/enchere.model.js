@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 const enchere_sch = new mongoose.Schema({
     sellerID: { type: mongoose.Types.ObjectId, ref: "User", required: true },
@@ -12,10 +12,15 @@ const enchere_sch = new mongoose.Schema({
     reserve_price: { type: Number },
     expiration_time: { type: Date, required: true },
     enchere_type: { type: String, enum: ["public", "privée"], default: "public" },
+    enchere_status: { type: String, enum: ["published", "pending", "rejected", "closed"], default: "pending" },
+    reject_motif: { type: String, trim: true },
     history: [{
         buyerID: { type: mongoose.Types.ObjectId, ref: "User", required: true },
         montant: { type: Number, required: true },
+        reserve_price: { type: Boolean, default: false },
+        date: { type: Number, default: new Date().getTime() }
     }],
-}, { timestamps: true });
-const EnchereModel = mongoose.model("Enchere", enchere_sch);
-module.exports = EnchereModel;
+    trash:{type:Boolean,default:false}
+}, { timestamps: true })
+const EnchereModel = mongoose.model("Enchere", enchere_sch)
+module.exports = EnchereModel
