@@ -6,3 +6,9 @@ exports.regex = {
 exports.constants = {
     sms_sender_number: "22373030732"
 }
+
+exports.upload_files_constants = {
+    MAX_FILES_LENGTH: 5,
+    FILES_ALLOW_TYPES: ['image/jpeg', 'image/png', 'video/mp4', 'video/avi'],//to be extend later
+    MAX_SIZE: 50 * 1024 * 1024, //50M
+}

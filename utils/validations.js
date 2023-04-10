@@ -1,8 +1,9 @@
 const { isValidObjectId } = require("mongoose");
-const { isEmpty, isEqual } = require("./functions");
+const { isEmpty } = require("./functions");
 const UserModel = require("../models/user.model");
-const { regex } = require("./constants");
+const { regex, upload_files_constants } = require("./constants");
 const EnchereModel = require("../models/enchere.model");
+const multer = require("multer");
 
 
 
@@ -131,18 +132,34 @@ exports.send_invitation_validation = (friend_phone) => {
 //------------------------ ENCHERE ----------------------------------------------------------
 exports.create_enchere_validation = async (req, res, next) => {
     try {
+
+        const files = req.files;
+
         let empty_error = { title: "", description: "", started_price: "", increase_price: "", categories: "", enchere_type: "" }
         let errors = empty_error
 
         let { hostID, title, description, started_price, increase_price, categories, enchere_type, expiration_time } = req.body
 
-
-        if (isEmpty(hostID)) throw "Identifiant utilisateur invalide ou incorrect."
+        if (hostID === "" || isEmpty(hostID)) throw "Identifiant utilisateur invalide ou incorrect."
 
         const user = await UserModel.findById(hostID)
 
         if (!isEmpty(user) && user.vip === true && enchere_type === "") errors = { ...errors, enchere_type: "Veuillez definire le type d'enchere pour votre article." }
         if (!isEmpty(user) && user.vip === true && enchere_type !== "" && (enchere_type !== "public" && enchere_type !== "privée")) errors = { ...errors, enchere_type: "L'enchere est soit public ou privée." }
+
+
+        if (files)
+            for (const file of files) {
+                if (file.size > upload_files_constants.IMAGES_MAX_SIZE && file.mimetype.startsWith('image/'))
+                    throw 'Erreur : la taille de l\'image est trop importante';
+
+                if (file.size > upload_files_constants.VIDEOS_MAX_SIZE && file.mimetype.startsWith('video/'))
+                    throw 'Erreur : la taille de la vidéo est trop importante';
+
+                if (!upload_files_constants.FILES_ALLOW_TYPES.includes(file.mimetype))
+                    throw 'Erreur : seuls les fichiers JPEG, PNG, MP4 et MOV sont autorisés';
+            }
+
         if (isEmpty(title)) errors = { ...errors, title: "Veuillez inserer le titre de l'article." }
         if (isEmpty(description)) errors = { ...errors, description: "Veuillez inserer la description de l'article." }
 
@@ -172,30 +189,30 @@ exports.update_enchere_validation = async (req, res, next) => {
         let { title, description, started_price, increase_price, categories, enchere_type, expiration_time } = req.body
 
 
-        if (isEmpty(req.params.id) ) throw "Identifiant de l'article invalide ou incorrect."
-        if (isEmpty(req.params.hostID) ) throw "Identifiant utilisateur invalide ou incorrect."
+        if (isEmpty(req.params.id)) throw "Identifiant de l'article invalide ou incorrect."
+        if (isEmpty(req.params.hostID)) throw "Identifiant utilisateur invalide ou incorrect."
 
         const user = await UserModel.findById(req.params.hostID)
         const enchere = await EnchereModel.findById(req.params.id)
 
 
         if (!isEmpty(user) && user.vip === true && enchere_type === "") errors = { ...errors, enchere_type: "Veuillez definire le type d'enchere pour votre article." }
-        
-        if(isEmpty(enchere))throw "Cet article n'existe pas." 
-        
+
+        if (isEmpty(enchere)) throw "Cet article n'existe pas."
+
         if (!isEmpty(user) && user.vip === true && enchere_type !== "" && (enchere_type !== "public" && enchere_type !== "privée")) errors = { ...errors, enchere_type: "L'enchere est soit public ou privée." }
-        if (title==="") errors = { ...errors, title: "Veuillez inserer le titre de l'article." }
-        if (description==="") errors = { ...errors, description: "Veuillez inserer la description de l'article." }
+        if (title === "") errors = { ...errors, title: "Veuillez inserer le titre de l'article." }
+        if (description === "") errors = { ...errors, description: "Veuillez inserer la description de l'article." }
 
-        if (expiration_time==="") errors = { ...errors, description: "Veuillez inserer la durée de l'enchère" }
+        if (expiration_time === "") errors = { ...errors, description: "Veuillez inserer la durée de l'enchère" }
 
 
 
-        if (started_price==="") errors = { ...errors, started_price: "Veuillez inserer le prix de demarage de l'enchère." }
+        if (started_price === "") errors = { ...errors, started_price: "Veuillez inserer le prix de demarage de l'enchère." }
         else if (!isEmpty(started_price) && started_price < 500) errors = { ...errors, started_price: "Le prix de demarage de l'enchère doit être superieur ou égale à 500 fcfa." }
 
-        if (increase_price==="") errors = { ...errors, increase_price: "Veuillez inserer le prix d'incrementation de l'enchère." }
-        if (categories==="" || categories===[]) errors = { ...errors, categories: "Veuillez choisir au moins une categorie pour votre article." }
+        if (increase_price === "") errors = { ...errors, increase_price: "Veuillez inserer le prix d'incrementation de l'enchère." }
+        if (categories === "" || categories === []) errors = { ...errors, categories: "Veuillez choisir au moins une categorie pour votre article." }
 
         if (errors !== empty_error) throw errors
         next()
@@ -204,3 +221,24 @@ exports.update_enchere_validation = async (req, res, next) => {
     }
 
 }
+
+// middleware for file validation
+exports.upload_files_validation = (err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        console.log(err)
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            res.status(400).json({ message: 'La taille du fichier est trop importante.' });
+        } else if (err.code === 'LIMIT_FILE_COUNT') {
+            res.status(400).json({ message: 'Vous pouvez télécharger un maximum de 5 fichiers.' });
+        } else if (err.code === 'INVALID_FILE_TYPE') {
+            res.status(400).json({ message: 'Seuls les fichiers JPEG, PNG, MP4 et MOV sont autorisés.' });
+        } else {
+            res.status(400).json({ message: 'Erreur lors du téléchargement des fichiers.' });
+        }
+    } else {
+        res.status(500).json({ message: 'Une erreur est survenue.' });
+    }
+};
+
+
+

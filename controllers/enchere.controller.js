@@ -1,12 +1,16 @@
 const { isValidObjectId } = require("mongoose")
-const { upload } = require("../middleware/middleware")
 const EnchereModel = require("../models/enchere.model")
 const { isEmpty } = require("../utils/functions")
 
 //-------------@return article created data --------------------
 exports.create_enchere = async (req, res) => {
     try {
-        req.body.sellerID=req.body.hostID
+        const files = req.files;
+
+        if (!isEmpty(files))
+            req.body.medias = req.files.map(file => file.path)
+
+        req.body.sellerID = req.body.hostID
         const enchere = new EnchereModel(req.body)
         const saved_data = await enchere.save()
         res.status(200).send({ response: saved_data, message: "Article mis en enchere avec succès mais en état d'attente patienter le temps que nous verifions la conformité de l'article avant de le mettre en enchère. Merci" })
@@ -46,8 +50,8 @@ exports.get_all_encheres = async (req, res) => {
 //we retrieve enchere data by it id and update it
 exports.update_enchere = async (req, res) => {
     try {
-        const enchere =await EnchereModel.findByIdAndUpdate(req.params.id,{$set:req.body},{new:true,upsert:true})
-        res.status(200).json({response:enchere})
+        const enchere = await EnchereModel.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true, upsert: true })
+        res.status(200).json({ response: enchere })
     } catch (error) {
         res.status(500).send({ message: error })
     }
@@ -133,16 +137,3 @@ exports.reject_enchere = async (req, res) => {
 
     }
 }
-
-// controller function to handle file upload
-exports.upload_files = upload.array('files', 5, (req, res) => {
-    try {
-        const files = req.files
-        if (!files)
-            throw 'Veuillez choisir des fichiers'
-
-        res.status(200).json({ response: files, message: 'Fichier uploader avec succès', })
-    } catch (error) {
-        res.status(500).send({ message: error })
-    }
-})

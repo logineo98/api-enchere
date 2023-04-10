@@ -2,6 +2,9 @@ const JsonWebToken = require("jsonwebtoken");
 const UserModel = require("../models/user.model");
 const { isEmpty } = require("../utils/functions");
 const multer = require("multer");
+const path = require('path');
+const { upload_files_constants } = require("../utils/constants");
+const { handleMulterErrors } = require("../utils/validations");
 
 
 
@@ -33,17 +36,35 @@ exports.authenticate = async (req, res, next) => {
     }
 };
 
-
-// configure storage for uploaded files
+//middleware for upload files
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/')
+        let destFolder = '';
+        if (file.mimetype.startsWith('image/')) {
+            destFolder = `${__dirname}/../public/images`;
+        } else if (file.mimetype.startsWith('video/')) {
+            destFolder = `${__dirname}/../public/videos`;
+        }
+        cb(null, destFolder);
     },
     filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-        cb(null, file.fieldname + '-' + uniqueSuffix + '.' + file.mimetype.split('/')[1])
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
     }
-})
+});
 
-// create multer instance with storage configuration
-exports.upload = multer({ storage: storage });
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype.startsWith('image/') && file.size > upload_files_constants.IMAGES_MAX_SIZE)
+        return cb(new Error('La taille du fichier image est trop importante'));
+    else if (file.mimetype.startsWith('video/') && file.size > upload_files_constants.VIDEOS_MAX_SIZE)
+        return cb(new Error('La taille du fichier vidéo est trop importante'));
+    else if (!upload_files_constants.FILES_ALLOW_TYPES.includes(file.mimetype))
+        return cb(new Error('Seuls les fichiers JPEG, PNG, MP4 et MOV sont autorisés'));
+    cb(null, true);
+}
+
+const limits = {
+    fileSize: upload_files_constants.IMAGES_MAX_SIZE,
+    files: upload_files_constants.MAX_FILES_LENGTH
+}
+
+exports.upload = multer({ storage, fileFilter, limits });
