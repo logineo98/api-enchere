@@ -2,18 +2,17 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 
 const user_sch = new mongoose.Schema({
-    name: { type: String },
     phone: { type: String, trim: true, unique: true, required: true },
     email: { type: String, trim: true },
     password: { type: String, trim: true, required: true, minlength: 6 },
-    picture: { type: String },
-    facebook: { type: String },
+    facebook: { id: String, first_name: String, last_name: String, picture_url: String },
     vip: { type: Boolean, default: false },
     reject: { type: Boolean, default: false },
     invitations: [String],
     licenseKey: { type: String },
     license_status: { type: Boolean, default: false },
     forgot_password_token: { type: String },
+    trash: { type: Boolean, default: false }
 }, { timestamps: true })
 
 // play function before save into display: 'block',
