@@ -133,8 +133,8 @@ exports.create_enchere_validation = async (req, res, next) => {
 
         if (hostID === "" || isEmpty(hostID)) throw "Identifiant utilisateur invalide ou incorrect."
 
-        if (isEmpty(title)) errors = { ...errors, title: "Veuillez inserer le titre de l'article." }
-        if (isEmpty(description)) errors = { ...errors, description: "Veuillez inserer la description de l'article." }
+        if (isEmpty(title)) errors = { ...errors, title: "Veuillez inserer le titre de l'enchère." }
+        if (isEmpty(description)) errors = { ...errors, description: "Veuillez inserer la description de l'enchère." }
 
         if (isEmpty(expiration_time)) errors = { ...errors, description: "Veuillez inserer la durée de l'enchère" }
 
@@ -144,7 +144,7 @@ exports.create_enchere_validation = async (req, res, next) => {
         if (isEmpty(increase_price)) errors = { ...errors, increase_price: "Veuillez inserer le prix d'incrementation de l'enchère." }
         else if (!isEmpty(increase_price) && increase_price < 500) errors = { ...errors, increase_price: "Le prix d'incrementation de l'enchère doit être superieur ou égale à 500 fcfa." }
 
-        if (isEmpty(categories)) errors = { ...errors, categories: "Veuillez choisir au moins une categorie pour votre article." }
+        if (isEmpty(categories)) errors = { ...errors, categories: "Veuillez choisir au moins une categorie pour votre enchère." }
 
         if (errors !== empty_error) throw errors
         next()
@@ -160,19 +160,19 @@ exports.update_enchere_validation = async (req, res, next) => {
 
         let { title, description, started_price, increase_price, categories, enchere_type, expiration_time } = req.body
 
-        if (isEmpty(req.params.id)) throw "Identifiant de l'article invalide ou incorrect."
+        if (isEmpty(req.params.id)) throw "Identifiant de l'enchère invalide ou incorrect."
         if (isEmpty(req.params.hostID)) throw "Identifiant utilisateur invalide ou incorrect."
 
-        const user = await UserModel.findById(req.params.hostID)
+        // const user = await UserModel.findById(req.params.hostID)
         const enchere = await EnchereModel.findById(req.params.id)
 
-        if (!isEmpty(user) && user.vip === true && enchere_type === "") errors = { ...errors, enchere_type: "Veuillez definire le type d'enchere pour votre article." }
+        // if (!isEmpty(user) && user.vip === true && enchere_type === "") errors = { ...errors, enchere_type: "Veuillez definire le type d'enchere pour votre enchère." }
 
-        if (isEmpty(enchere)) throw "Cet article n'existe pas."
+        if (isEmpty(enchere)) throw "Désolé, aucune enchère correspondante n'a été trouvée."
 
-        if (!isEmpty(user) && user.vip === true && enchere_type !== "" && (enchere_type !== "public" && enchere_type !== "privée")) errors = { ...errors, enchere_type: "L'enchere est soit public ou privée." }
-        if (title === "") errors = { ...errors, title: "Veuillez inserer le titre de l'article." }
-        if (description === "") errors = { ...errors, description: "Veuillez inserer la description de l'article." }
+        // if (!isEmpty(user) && user.vip === true && enchere_type !== "" && (enchere_type !== "public" && enchere_type !== "privée")) errors = { ...errors, enchere_type: "L'enchere est soit public ou privée." }
+        if (title === "") errors = { ...errors, title: "Veuillez inserer le titre de l'enchère." }
+        if (description === "") errors = { ...errors, description: "Veuillez inserer la description de l'enchère." }
 
         if (expiration_time === "") errors = { ...errors, description: "Veuillez inserer la durée de l'enchère" }
 
@@ -180,7 +180,7 @@ exports.update_enchere_validation = async (req, res, next) => {
         else if (!isEmpty(started_price) && started_price < 500) errors = { ...errors, started_price: "Le prix de demarage de l'enchère doit être superieur ou égale à 500 fcfa." }
 
         if (increase_price === "") errors = { ...errors, increase_price: "Veuillez inserer le prix d'incrementation de l'enchère." }
-        if (categories === "" || categories === []) errors = { ...errors, categories: "Veuillez choisir au moins une categorie pour votre article." }
+        if (categories === "" || categories === []) errors = { ...errors, categories: "Veuillez choisir au moins une categorie pour votre enchère." }
 
         if (errors !== empty_error) throw errors
         next()

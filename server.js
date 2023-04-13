@@ -23,6 +23,8 @@ app.use((err, req, res, next) => {
         res.status(400).send({ message: `Désolé, Désolé la taille d'un fichier (image ou video) ne doit pas depasser ${convertOctetsToMo(upload_files_constants.MAX_SIZE)}` })
     } else if (err.code === "LIMIT_FILE_COUNT") {
         res.status(400).send({ message: "Désolé, le nombre maximum de fichier autorisé est 5" })
+    } else if (err.code === "ENOENT" && err.syscall === "unlink") {
+        res.status(400).send({ message: "Le fichier n'a pas été trouvé pour être supprimé." })
     } else {
         res.status(400).json({ message: err.message })
     }
@@ -30,5 +32,5 @@ app.use((err, req, res, next) => {
 
 const port = process.env.PORT || 5000
 app.listen(port, () =>
-    console.log(`Server listening on http://localhost:${port}`)
+    console.log(`Listening on port ${port}`)
 )

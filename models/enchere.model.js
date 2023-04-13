@@ -11,7 +11,7 @@ const enchere_sch = new mongoose.Schema({
     increase_suggestion_price: { type: [Number], default: [1, 2, 3] },
     reserve_price: { type: Number },
     expiration_time: { type: Date, required: true },
-    enchere_type: { type: String, enum: ["public", "privée"], default: "public" },
+    enchere_type: { type: String, enum: ["public", "private"], default: "public" },
     enchere_status: { type: String, enum: ["published", "pending", "rejected", "closed"], default: "pending" },
     reject_motif: { type: String, trim: true },
     history: [{
