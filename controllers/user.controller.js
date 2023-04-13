@@ -1,10 +1,10 @@
-const { isValidObjectId } = require("mongoose");
-const UserModel = require("../models/user.model");
-const { send_invitation_validation } = require("../utils/validations");
-const { isEmpty, genRandomNums, sendSMS, isEqual } = require("../utils/functions");
-const bcrypt = require('bcrypt');
-const jwt = require("jsonwebtoken");
-const { constants } = require("../utils/constants");
+const { isValidObjectId } = require("mongoose")
+const UserModel = require("../models/user.model")
+const { send_invitation_validation } = require("../utils/validations")
+const { isEmpty, genRandomNums, sendSMS, isEqual } = require("../utils/functions")
+const bcrypt = require('bcrypt')
+const jwt = require("jsonwebtoken")
+const { constants } = require("../utils/constants")
 
 //--------- @return "user's data" and "success message" ----------------
 //update user's info and password if exist
@@ -23,7 +23,7 @@ exports.update_user = async (req, res) => {
 
         res.status(200).json({ response: user, message: "Informations de l'utilisateur mise à jour." })
     } catch (error) {
-        res.status(500).send({ message: error.message });
+        res.status(500).send({ message: error.message })
     }
 
 }
@@ -37,7 +37,7 @@ exports.get_user = async (req, res) => {
 
         res.status(401).json({ response: user, message: "Utilisateur recuperer avec succès" })
     } catch (error) {
-        res.status(500).send({ message: error.message });
+        res.status(500).send({ message: error.message })
     }
 }
 
@@ -47,12 +47,12 @@ exports.get_users = async (req, res) => {
     try {
         const user = await UserModel.find().select("-password")
 
-        let message;
+        let message
         if (isEmpty(user)) message = "Liste des utilisateurs est vide"
 
         res.status(401).json({ response: user, message: message ? message : "Utilisateur recuperer avec succès" })
     } catch (error) {
-        res.status(500).send({ message: error.message });
+        res.status(500).send({ message: error.message })
     }
 }
 
@@ -67,13 +67,13 @@ exports.delete_user = async (req, res) => {
 
         res.status(200).json({ response: user, message: "Utilisateur supprimé avec succès." })
     } catch (error) {
-        res.status(500).send({ message: error });
+        res.status(500).send({ message: error })
     }
 }
 
 exports.send_invitation = (req, res) => {
     if (!isValidObjectId(req.params.id)) {
-        return res.status(400).json({ message: "Désolé l'identifiant de l'utilisateur n'est pas correct !" });
+        return res.status(400).json({ message: "Désolé l'identifiant de l'utilisateur n'est pas correct !" })
     }
 
     const { friend_phone } = req.body
@@ -129,11 +129,11 @@ exports.forgot_password = async (req, res) => {
 
             const token = genRandomNums(4)
 
-            const payload = { token };
-            const options = { expiresIn: 15 * 60 };
+            const payload = { token }
+            const options = { expiresIn: 15 * 60 }
 
 
-            const forgot_password_token = jwt.sign(payload, process.env.JWT_SECRET, options);
+            const forgot_password_token = jwt.sign(payload, process.env.JWT_SECRET, options)
             const updated = await UserModel.findOneAndUpdate(user?._id, { $set: { forgot_password_token } }, { new: true, upsert: true })
 
             if (isEmpty(updated)) throw "Erreur de reinitialisation du mot de passe"
@@ -146,7 +146,7 @@ exports.forgot_password = async (req, res) => {
             res.status(200).json({ response: token, message: "Code de recuperation envoyé" })
         }
     } catch (error) {
-        res.status(500).send({ message: error.message });
+        res.status(500).send({ message: error.message })
     }
 
 }
@@ -165,22 +165,22 @@ exports.confirm_forgot_recovery_code = async (req, res) => {
         if (isEmpty(user)) throw "Veuillez-vous authentifier!"
 
         const data = jwt.verify(user?.forgot_password_token, process.env.JWT_SECRET)
-        if (isEmpty(data.token)) throw "Votre code de recuperation est expiré";
+        if (isEmpty(data.token)) throw "Votre code de recuperation est expiré"
 
-        const expDate = new Date(data.exp * 1000);
+        const expDate = new Date(data.exp * 1000)
 
         if (expDate < new Date())
-            throw "Votre code de recuperation est expiré";
+            throw "Votre code de recuperation est expiré"
 
         if (!isEqual(code, data.token))
-            throw "Votre code de recuperation est expiré";
+            throw "Votre code de recuperation est expiré"
 
         // if (code !== data.token!isEqual(code, data.token))
-        // throw "Votre code de recuperation est expiré 3";
+        // throw "Votre code de recuperation est expiré 3"
 
         res.send({ response: true })
     } catch (error) {
-        res.status(500).send({ message: error });
+        res.status(500).send({ message: error })
     }
 }
 
@@ -202,7 +202,7 @@ exports.reset_forgot_password = async (req, res) => {
 
         res.status(200).json({ response: user, message: "Mot de passe modifié avec succès." })
     } catch (error) {
-        res.status(500).send({ message: error });
+        res.status(500).send({ message: error })
     }
 
 }

@@ -4,6 +4,7 @@ const cors = require("cors")
 const path = require("path")
 const bodyParser = require("body-parser")
 const { upload_files_constants } = require("./utils/constants")
+const { convertOctetsToMo } = require("./utils/functions")
 require("./config/db")
 const app = express()
 
@@ -18,9 +19,8 @@ app.use("/api/enchere", require("./routes/enchere.route"))
 
 //upload files error handler
 app.use((err, req, res, next) => {
-    // console.log(err)
     if (err.code === "LIMIT_FILE_SIZE") {
-        res.status(400).send({ message: `Désolé, Désolé la taille d'un fichier (image ou video) ne doit pas depasser ${upload_files_constants.MAX_SIZE}` })
+        res.status(400).send({ message: `Désolé, Désolé la taille d'un fichier (image ou video) ne doit pas depasser ${convertOctetsToMo(upload_files_constants.MAX_SIZE)}` })
     } else if (err.code === "LIMIT_FILE_COUNT") {
         res.status(400).send({ message: "Désolé, le nombre maximum de fichier autorisé est 5" })
     } else {

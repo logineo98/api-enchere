@@ -118,3 +118,8 @@ exports.sendSMS = async (from, to, message) => {
         return error;
     }
 }
+
+exports.convertOctetsToMo = (octets) => {
+    const megaoctets = octets / (1024 * 1024)
+    return megaoctets.toFixed(0) + ' Mo'
+}

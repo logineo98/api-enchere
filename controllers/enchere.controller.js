@@ -1,14 +1,15 @@
 const { isValidObjectId } = require("mongoose")
 const EnchereModel = require("../models/enchere.model")
 const { isEmpty } = require("../utils/functions")
+const fs = require("fs")
 
 //-------------@return article created data --------------------
 exports.create_enchere = async (req, res) => {
     try {
-        const files = req.files;
+        const files = req.files
 
         if (!isEmpty(files))
-            req.body.medias = req.files.map(file => file.path)
+            req.body.medias = req.files.map(file => file.filename)
 
         req.body.sellerID = req.body.hostID
         const enchere = new EnchereModel(req.body)
@@ -63,8 +64,31 @@ exports.delete_enchere = async (req, res) => {
         if (!isValidObjectId(req.params.id)) return res.status(400).json({ message: "L'identifiant de l'enchère est invalide." })
 
         const enchere = await EnchereModel.findByIdAndDelete(req.params.id)
-        if (!enchere) return res.status(404).json({ message: "Désolé, aucune enchère correspondante n'a été trouvée." })
-        res.send({ response: enchere, message: "Suppression de l'enchère effectuée avec succès." })
+
+        if (enchere) {
+            const medias = enchere.medias
+
+            medias.forEach(media => {
+                const typeFile = media.split("-")[0]
+                let pathFilename = ""
+
+                if (typeFile === "image") {
+                    pathFilename = `${__dirname}/../public/images/${media}`
+                } else if (typeFile === "video") {
+                    pathFilename = `${__dirname}/../public/videos/${media}`
+                }
+
+                fs.unlink(pathFilename, (error) => {
+                    if (error) throw error
+                    console.log(`${media} a été supprimée`)
+                })
+            })
+
+            res.send({ response: enchere, message: "Suppression de l'enchère effectuée avec succès." })
+        } else {
+            return res.status(404).json({ message: "Désolé, aucune enchère correspondante n'a été trouvée." })
+        }
+
     } catch (error) {
         res.status(500).send({ message: error })
     }

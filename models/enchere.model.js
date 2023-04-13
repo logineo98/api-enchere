@@ -20,7 +20,7 @@ const enchere_sch = new mongoose.Schema({
         reserve_price: { type: Boolean, default: false },
         date: { type: Number, default: new Date().getTime() }
     }],
-    trash:{type:Boolean,default:false}
+    trash: { type: Boolean, default: false }
 }, { timestamps: true })
 const EnchereModel = mongoose.model("Enchere", enchere_sch)
 module.exports = EnchereModel

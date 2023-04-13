@@ -4,8 +4,6 @@ const { isEmpty } = require("../utils/functions")
 const multer = require("multer")
 const path = require('path')
 const { upload_files_constants } = require("../utils/constants")
-const { handleMulterErrors } = require("../utils/validations")
-
 
 
 //middleware for check token validy, if true return user's id else throw errors
@@ -45,10 +43,18 @@ const storage = multer.diskStorage({
         } else if (file.mimetype.startsWith('video/')) {
             destFolder = `${__dirname}/../public/videos`
         }
+
         cb(null, destFolder)
     },
     filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
+        let name = ''
+        if (file.mimetype.startsWith('image/')) {
+            name = 'image' + '-' + Date.now() + path.extname(file.originalname)
+        } else if (file.mimetype.startsWith('video/')) {
+            name = 'video' + '-' + Date.now() + path.extname(file.originalname)
+        }
+
+        cb(null, name)
     }
 })
 
