@@ -1,70 +1,69 @@
-const JsonWebToken = require("jsonwebtoken");
-const UserModel = require("../models/user.model");
-const { isEmpty } = require("../utils/functions");
-const multer = require("multer");
-const path = require('path');
-const { upload_files_constants } = require("../utils/constants");
-const { handleMulterErrors } = require("../utils/validations");
+const JsonWebToken = require("jsonwebtoken")
+const UserModel = require("../models/user.model")
+const { isEmpty } = require("../utils/functions")
+const multer = require("multer")
+const path = require('path')
+const { upload_files_constants } = require("../utils/constants")
+const { handleMulterErrors } = require("../utils/validations")
 
 
 
 //middleware for check token validy, if true return user's id else throw errors
 exports.authenticate = async (req, res, next) => {
     try {
-        let token = req.header("token");
+        let token = req.header("token")
 
         if (isEmpty(token))
-            throw "authentification impossible";
+            throw "authentification impossible"
 
 
-        const data = JsonWebToken.verify(token, process.env.JWT_SECRET);
+        const data = JsonWebToken.verify(token, process.env.JWT_SECRET)
 
         if ((req.body.hostID && req.body.hostID !== data.id) || (req.params.hostID && req.params.hostID !== data.id)) {
             throw "Désolé, vous n'êtes la personne autorisée à effectuer cette action !"
         }
 
         if (isEmpty(data.id))
-            throw "Delais d'authentification expiré";
+            throw "Delais d'authentification expiré"
 
-        const user = await UserModel.findById(data.id);
-        if (isEmpty(user)) throw "Echec d'authentification";
+        const user = await UserModel.findById(data.id)
+        if (isEmpty(user)) throw "Echec d'authentification"
 
-        req.id = user;
-        next();
+        req.id = user
+        next()
     } catch (error) {
-        res.status(401).json({ message: error });
+        res.status(401).json({ message: error })
     }
-};
+}
 
 //middleware for upload files
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        let destFolder = '';
+        let destFolder = ''
         if (file.mimetype.startsWith('image/')) {
-            destFolder = `${__dirname}/../public/images`;
+            destFolder = `${__dirname}/../public/images`
         } else if (file.mimetype.startsWith('video/')) {
-            destFolder = `${__dirname}/../public/videos`;
+            destFolder = `${__dirname}/../public/videos`
         }
-        cb(null, destFolder);
+        cb(null, destFolder)
     },
     filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
     }
-});
+})
 
 const fileFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith('image/') && file.size > upload_files_constants.IMAGES_MAX_SIZE)
-        return cb(new Error('La taille du fichier image est trop importante'));
-    else if (file.mimetype.startsWith('video/') && file.size > upload_files_constants.VIDEOS_MAX_SIZE)
-        return cb(new Error('La taille du fichier vidéo est trop importante'));
-    else if (!upload_files_constants.FILES_ALLOW_TYPES.includes(file.mimetype))
-        return cb(new Error('Seuls les fichiers JPEG, PNG, MP4 et MOV sont autorisés'));
-    cb(null, true);
+    if (!upload_files_constants.FILES_ALLOW_TYPES.includes(file.mimetype)) {
+        return cb(new Error('Seuls les fichiers JPEG, PNG, MP4 et MOV sont autorisés'))
+    }
+
+    cb(null, true)
 }
 
 const limits = {
-    fileSize: upload_files_constants.IMAGES_MAX_SIZE,
-    files: upload_files_constants.MAX_FILES_LENGTH
+    fileSize: upload_files_constants.MAX_SIZE,
+    files: upload_files_constants.MAX_FILES_TO_UPLOAD
 }
 
-exports.upload = multer({ storage, fileFilter, limits });
+exports.upload = multer({ storage, fileFilter, limits })
+

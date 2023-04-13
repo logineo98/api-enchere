@@ -3,8 +3,7 @@ const express = require("express")
 const cors = require("cors")
 const path = require("path")
 const bodyParser = require("body-parser")
-const { upload_files_validation } = require("./utils/validations")
-const multer = require("multer")
+const { upload_files_constants } = require("./utils/constants")
 require("./config/db")
 const app = express()
 
@@ -20,24 +19,14 @@ app.use("/api/enchere", require("./routes/enchere.route"))
 
 //upload files error handler
 app.use((err, req, res, next) => {
-    if (err instanceof multer.MulterError) {
-        if (err.code === 'LIMIT_FILE_SIZE') {
-            res.status(400).json({ message: 'La taille du fichier est trop importante.' });
-        } else if (err.code === 'LIMIT_FILE_COUNT') {
-            res.status(400).json({ message: 'Le nombre maximum de fichier autorisé est: 5 fichiers' });
-        } else {
-            next(err);
-        }
-    } else if (err instanceof Error) {
-        if (err.message === 'la taille de l\'image est trop importante' || err.message === 'la taille de la vidéo est trop importante' || err.message === ' seuls les fichiers JPEG, PNG, MP4 et MOV sont autorisés') {
-            res.status(400).json({ message: err.message });
-        } else {
-            res.status(500).json({ message: err.message || 'Une erreur est survenue.' });
-        }
+    // console.log(err)
+    if (err.code === "LIMIT_FILE_SIZE") {
+        res.status(400).send({ message: `Désolé, Désolé la taille d'un fichier (image ou video) ne doit pas depasser ${upload_files_constants.MAX_SIZE}` })
+    } else if (err.code === "LIMIT_FILE_COUNT") {
+        res.status(400).send({ message: "Désolé, le nombre maximum de fichier autorisé est 5" })
     } else {
-        next(err);
+        res.status(400).json({ message: err.message })
     }
-
 })
 
 const port = process.env.PORT || 5000

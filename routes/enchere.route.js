@@ -6,7 +6,8 @@ const { create_enchere_validation, update_enchere_validation, upload_files_valid
 
 const router = require('express').Router()
 
-router.post("/", authenticate, create_enchere_validation, upload.array('files', upload_files_constants.MAX_FILES_LENGTH), create_enchere)
+// router.post("/", authenticate, create_enchere_validation, upload.array('files', upload_files_constants.MAX_FILES_LENGTH), create_enchere)
+router.post("/", upload.array('files', upload_files_constants.MAX_SIZE), (req, res) => { console.log(req.files) }) //authenticate, create_enchere_validation, create_enchere
 router.get("/:id/:hostID", authenticate, get_enchere)
 router.get("/:hostID", authenticate, get_all_encheres)
 router.put("/:id/:hostID", authenticate, update_enchere_validation, update_enchere)

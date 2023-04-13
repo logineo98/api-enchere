@@ -238,7 +238,4 @@ exports.upload_files_validation = (err, req, res, next) => {
     } else {
         res.status(500).json({ message: 'Une erreur est survenue.' });
     }
-};
-
-
-
+}

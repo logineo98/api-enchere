@@ -8,7 +8,7 @@ exports.constants = {
 }
 
 exports.upload_files_constants = {
-    MAX_FILES_LENGTH: 5,
-    FILES_ALLOW_TYPES: ['image/jpeg', 'image/png', 'video/mp4', 'video/avi'],//to be extend later
-    MAX_SIZE: 50 * 1024 * 1024, //50M
+    MAX_FILES_TO_UPLOAD: 5,
+    FILES_ALLOW_TYPES: ['image/jpeg', 'image/jpg', 'image/png', 'video/mp4', 'video/avi'],//to be extend later
+    MAX_SIZE: 10 * 1024 * 1024, //10 MO
 }
