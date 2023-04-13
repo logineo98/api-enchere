@@ -115,25 +115,3 @@ exports.participate_in_enchere = async (req, res) => {
     }
 
 }
-
-//----------return the rejected article data ----------------
-exports.reject_enchere = async (req, res) => {
-    try {
-        if (!isValidObjectId(req.params.id)) return res.status(400).json({ message: "L'identifiant de l'enchère est invalide." })
-
-        const { reject_motif } = req.body
-
-        const enchere = await EnchereModel.findById(req.params.id)
-        if (!enchere) return res.status(404).json({ message: "Désolé, aucune enchère correspondante n'a été trouvée." })
-
-        enchere.enchere_status = "rejected"
-        enchere.reject_motif = reject_motif
-
-        const enchere_after_reject = await enchere.save()
-        if (!enchere_after_reject) throw "Une erreur est survenue au niveau du serveur lors du rejet l'enchère."
-
-        res.send({ response: enchere_after_reject, message: "L'enchère a été rejetée." })
-    } catch (error) {
-
-    }
-}
