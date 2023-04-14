@@ -60,8 +60,8 @@ exports.update_user_validation = async (req, res, next) => {
     }
 }
 
-exports.register_validation = (phone, password) => {
-    const initialError = { phone: "", password: "" }
+exports.register_validation = (phone, password, password_confirm) => {
+    const initialError = { phone: "", password: "", password_confirm: "" }
     let error = initialError
 
     // verifier si le numéro de téléphone est valide
@@ -76,6 +76,8 @@ exports.register_validation = (phone, password) => {
         error = { ...error, password: "Désolé, le mot de passe est requis !" }
     } else if (password.trim().length < 6) {
         error = { ...error, password: "Désolé, le mot de passe doit être au moins 6 caractères !" }
+    } else if (password.trim() !== password_confirm.trim()) {
+        error = { ...error, password_confirm: "Désolé, les deux mots de passe ne se correspondent pas!" }
     }
 
     return { error, initialError }
@@ -103,7 +105,7 @@ exports.register_error_validation = (error) => {
     }
 
     if (code === 11000 && keyPattern.phone) {
-        return { phone: "Désolé, ce numéro de téléphone existe déjà !" }
+        return { message: "Désolé, ce numéro de téléphone existe déjà !" }
     }
 
     return infoError

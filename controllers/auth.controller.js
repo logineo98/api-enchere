@@ -103,9 +103,9 @@ exports.licenseActivation = async (req, res) => {
 }
 
 exports.register = (req, res) => {
-    const { phone, password } = req.body
+    const { phone, password, password_confirm } = req.body
 
-    const { error, initialError } = register_validation(phone, password)
+    const { error, initialError } = register_validation(phone, password, password_confirm)
 
     const user = new UserModel({ phone, password })
 
