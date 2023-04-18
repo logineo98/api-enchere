@@ -86,6 +86,7 @@ exports.update_enchere = async (req, res) => {
         if (enchere_type) enchere.enchere_type = enchere_type
         if (enchere_status) enchere.enchere_status = enchere_status
         if (reject_motif) enchere.reject_motif = reject_motif
+        if (delivery_options) enchere.delivery_options = delivery_options
         if (trash) enchere.trash = trash
 
         const enchere_after_update = await enchere.save()
