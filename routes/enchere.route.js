@@ -1,4 +1,4 @@
-const { create_enchere, participate_in_enchere, get_enchere, get_all_encheres, update_enchere, delete_enchere } = require('../controllers/enchere.controller')
+const { create_enchere, participate_in_enchere, get_enchere, get_all_encheres, update_enchere, delete_enchere, search_result } = require('../controllers/enchere.controller')
 const { upload } = require('../middleware/middleware')
 const { authenticate } = require('../middleware/middleware')
 const { upload_files_constants } = require('../utils/constants')
@@ -13,6 +13,6 @@ router.put("/:id/:hostID", upload.array('files', upload_files_constants.MAX_FILE
 router.delete("/:id/:hostID", authenticate, delete_enchere)
 
 router.patch("/participate-in-enchere/:id/:hostID", authenticate, participate_in_enchere)
-
+router.patch("/search/:hostID", authenticate, search_result)
 
 module.exports = router

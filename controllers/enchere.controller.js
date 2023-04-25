@@ -2,6 +2,7 @@ const { isValidObjectId } = require("mongoose")
 const EnchereModel = require("../models/enchere.model")
 const { isEmpty } = require("../utils/functions")
 const fs = require("fs")
+const UserModel = require("../models/user.model")
 
 //-------------@return article created data --------------------
 exports.create_enchere = async (req, res) => {
@@ -175,6 +176,75 @@ exports.participate_in_enchere = async (req, res) => {
         }
     } catch (error) {
         res.status(500).send({ message: error.message })
+    }
+
+}
+
+exports.search_result = async (req, res) => {
+
+    try {
+        const { search_text, search_by_filter } = req.body
+        const encheres = await EnchereModel.find()
+
+        if (!isEmpty(encheres)) {
+            let search_result = []
+
+
+            for (const enchere of encheres) {
+                if (search_text.trim()) {
+                    if (enchere.title.toLowerCase().trim().match(search_text.toLowerCase().trim()) || enchere.description.toLowerCase().trim().match(search_text.toLowerCase().trim())) {
+                        search_result.push(enchere)
+                    }
+                } else {
+                    const { lieu, categories, date, montant } = search_by_filter
+
+                    if (!isEmpty(lieu)) {
+                        const user = await UserModel.findById(enchere.sellerID)
+
+                        if (lieu.includes(user.town)) {
+                            const enchere_verify = search_result.find(ench => ench._id == enchere._id)
+
+                            if (enchere_verify === undefined) search_result.push(enchere)
+                        }
+                    }
+
+                    if (!isEmpty(categories)) {
+                        enchere.categories.forEach(category => {
+                            if (categories.includes(category)) {
+                                const enchere_verify = search_result.find(ench => ench._id == enchere._id)
+
+                                if (enchere_verify === undefined) search_result.push(enchere)
+                            }
+                        })
+                    }
+
+                    if (!isEmpty(date)) {
+                        const date_f = new Date(date).getTime()
+                        const enchere_createdAt = enchere.createdAt.getTime()
+
+                        if (enchere_createdAt <= date_f) {
+                            const enchere_verify = search_result.find(ench => ench._id == enchere._id)
+
+                            if (enchere_verify === undefined) search_result.push(enchere)
+                        }
+                    }
+
+                    if (!isEmpty(montant)) {
+                        if (enchere.started_price <= montant) {
+                            const enchere_verify = search_result.find(ench => ench._id == enchere._id)
+
+                            if (enchere_verify === undefined) search_result.push(enchere)
+                        }
+                    }
+                }
+            }
+
+            res.send(search_result)
+        } else {
+            res.send({ message: "Aucune enchère n'existe." })
+        }
+    } catch (error) {
+        res.status(500).send({ message: error })
     }
 
 }
