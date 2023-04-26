@@ -7,12 +7,14 @@ const user_sch = new mongoose.Schema({
     town: { type: String, trim: true },
     password: { type: String, trim: true, required: true, minlength: 6 },
     facebook: { id: String, first_name: String, last_name: String, picture_url: String },
+    confirm_facebook_later: { type: Boolean, default: false },
     vip: { type: Boolean, default: false },
     reject: { type: Boolean, default: false },
     invitations: [String],
     licenseKey: { type: String },
     license_status: { type: Boolean, default: false },
     forgot_password_token: { type: String },
+    likes: [{ type: mongoose.Types.ObjectId, ref: "Enchere", required: true }],
     trash: { type: Boolean, default: false }
 }, { timestamps: true })
 

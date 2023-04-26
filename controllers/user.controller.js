@@ -4,7 +4,7 @@ const { send_invitation_validation } = require("../utils/validations")
 const { isEmpty, genRandomNums, sendSMS, isEqual } = require("../utils/functions")
 const bcrypt = require('bcrypt')
 const jwt = require("jsonwebtoken")
-const { constants } = require("../utils/constants")
+const EnchereModel = require("../models/enchere.model")
 
 //--------- @return "user's data" and "success message" ----------------
 //update user's info and password if exist
@@ -117,6 +117,22 @@ exports.send_invitation = (req, res) => {
     }
 }
 
+exports.like_enchere = async (req, res) => {
+    try {
+        const { enchere_id } = req.body
+
+        if (!isValidObjectId(req.params.id) || !isValidObjectId(enchere_id)) {
+            return res.status(400).json({ message: "Désolé l'identifiant de l'utilisateur ou de l'enchère n'est pas correct !" })
+        }
+
+        const user_after_update = await UserModel.findByIdAndUpdate(req.params.id, { $addToSet: { likes: enchere_id } }, { new: true })
+        if (!user_after_update) throw "Désolé une erreur est survenue au niveau du serveur lors du like de l'enchère."
+
+        res.send({ response: user_after_update, message: "Enchère ajoutée aux favoris avec succès." })
+    } catch (error) {
+        res.status(500).send({ message: error })
+    }
+}
 
 exports.forgot_password = async (req, res) => {
     try {

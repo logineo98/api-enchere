@@ -45,7 +45,6 @@ exports.get_all_encheres = async (req, res) => {
     } catch (error) {
         res.status(500).send({ message: error })
     }
-
 }
 
 //----------@return enchere updated data ----------------------
