@@ -247,3 +247,37 @@ exports.search_result = async (req, res) => {
     }
 
 }
+
+exports.like_enchere = async (req, res) => {
+    try {
+        const { user_id } = req.body
+
+        if (!isValidObjectId(req.params.id) || !isValidObjectId(user_id)) {
+            return res.status(400).json({ message: "Désolé l'identifiant de l'utilisateur ou de l'enchère n'est pas correct !" })
+        }
+
+        const enchere_after_update = await EnchereModel.findByIdAndUpdate(req.params.id, { $addToSet: { likes: user_id } }, { new: true })
+        if (!enchere_after_update) throw "Désolé une erreur est survenue au niveau du serveur lors du like de l'enchère."
+
+        res.send({ response: enchere_after_update, message: "Enchère ajoutée aux favoris avec succès." })
+    } catch (error) {
+        res.status(500).send({ message: error })
+    }
+}
+
+exports.dislike_enchere = async (req, res) => {
+    try {
+        const { user_id } = req.body
+
+        if (!isValidObjectId(req.params.id) || !isValidObjectId(user_id)) {
+            return res.status(400).json({ message: "Désolé l'identifiant de l'utilisateur ou de l'enchère n'est pas correct !" })
+        }
+
+        const enchere_after_update = await EnchereModel.findByIdAndUpdate(req.params.id, { $pull: { likes: user_id } }, { new: true })
+        if (!enchere_after_update) throw "Désolé une erreur est survenue au niveau du serveur lors du like de l'enchère."
+
+        res.send({ response: enchere_after_update, message: "Enchère retirée aux favoris avec succès." })
+    } catch (error) {
+        res.status(500).send({ message: error })
+    }
+}

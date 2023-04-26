@@ -14,7 +14,6 @@ const user_sch = new mongoose.Schema({
     licenseKey: { type: String },
     license_status: { type: Boolean, default: false },
     forgot_password_token: { type: String },
-    likes: [{ type: mongoose.Types.ObjectId, ref: "Enchere", required: true }],
     trash: { type: Boolean, default: false }
 }, { timestamps: true })
 

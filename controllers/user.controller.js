@@ -114,23 +114,6 @@ exports.send_invitation = (req, res) => {
     }
 }
 
-exports.like_enchere = async (req, res) => {
-    try {
-        const { enchere_id } = req.body
-
-        if (!isValidObjectId(req.params.id) || !isValidObjectId(enchere_id)) {
-            return res.status(400).json({ message: "Désolé l'identifiant de l'utilisateur ou de l'enchère n'est pas correct !" })
-        }
-
-        const user_after_update = await UserModel.findByIdAndUpdate(req.params.id, { $addToSet: { likes: enchere_id } }, { new: true })
-        if (!user_after_update) throw "Désolé une erreur est survenue au niveau du serveur lors du like de l'enchère."
-
-        res.send({ response: user_after_update, message: "Enchère ajoutée aux favoris avec succès." })
-    } catch (error) {
-        res.status(500).send({ message: error })
-    }
-}
-
 exports.forgot_password = async (req, res) => {
     try {
         const { plateforme, phone } = req.body
