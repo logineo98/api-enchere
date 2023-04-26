@@ -47,10 +47,7 @@ exports.get_users = async (req, res) => {
     try {
         const user = await UserModel.find().sort({ createdAt: -1 }).select("-password")
 
-        let message
-        if (isEmpty(user)) message = "Liste des utilisateurs est vide"
-
-        res.status(401).json({ response: user, message: message ? message : "Utilisateur recuperer avec succès" })
+        res.status(401).json({ response: user, message: "" })
     } catch (error) {
         res.status(500).send({ message: error.message })
     }
