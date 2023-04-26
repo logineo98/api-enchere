@@ -45,7 +45,7 @@ exports.get_user = async (req, res) => {
 //retrieve users datas
 exports.get_users = async (req, res) => {
     try {
-        const user = await UserModel.find().select("-password")
+        const user = await UserModel.find().sort({ createdAt: -1 }).select("-password")
 
         let message
         if (isEmpty(user)) message = "Liste des utilisateurs est vide"

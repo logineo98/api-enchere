@@ -39,7 +39,7 @@ exports.get_enchere = async (req, res) => {
 //-------------@return all articles -----------------------------
 exports.get_all_encheres = async (req, res) => {
     try {
-        const encheres = await EnchereModel.find()
+        const encheres = await EnchereModel.find().sort({ createdAt: -1 })
         if (!encheres) throw "Une erreur est survenue au niveau du serveur lors de la recuperation des enchères."
         res.send({ response: encheres })
     } catch (error) {
@@ -52,7 +52,7 @@ exports.get_all_encheres = async (req, res) => {
 //we retrieve enchere data by it id and update it
 exports.update_enchere = async (req, res) => {
     try {
-        const { title, description, categories, started_price, increase_price, reserve_price, expiration_time, enchere_type, enchere_status, reject_motif, trash } = req.body
+        const { title, description, categories, started_price, increase_price, reserve_price, expiration_time, enchere_type, enchere_status, reject_motif, delivery_options, trash } = req.body
         const files = req.files
         const enchere = await EnchereModel.findById(req.params.id)
 
