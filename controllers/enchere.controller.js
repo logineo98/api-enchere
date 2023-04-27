@@ -190,7 +190,7 @@ exports.search_result = async (req, res) => {
 
 
             for (const enchere of encheres) {
-                if (search_text.trim()) {
+                if (search_text?.trim()) {
                     if (enchere.title.toLowerCase().trim().match(search_text.toLowerCase().trim()) || enchere.description.toLowerCase().trim().match(search_text.toLowerCase().trim())) {
                         search_result.push(enchere)
                     }
