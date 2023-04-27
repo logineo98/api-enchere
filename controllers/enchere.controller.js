@@ -238,7 +238,7 @@ exports.search_result = async (req, res) => {
                 }
             }
 
-            res.send(search_result)
+            res.send({ response: search_result })
         } else {
             res.send({ message: "Aucune enchère n'existe." })
         }
