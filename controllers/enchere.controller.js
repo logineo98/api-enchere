@@ -183,7 +183,7 @@ exports.search_result = async (req, res) => {
 
     try {
         const { search_text, search_by_filter } = req.body
-        const encheres = await EnchereModel.find()
+        const encheres = await EnchereModel.find().sort({ createdAt: -1 })
 
         if (!isEmpty(encheres)) {
             let search_result = []
