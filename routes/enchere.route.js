@@ -17,4 +17,7 @@ router.patch("/search/:hostID", authenticate, search_result)
 router.patch("/like-enchere/:id/:hostID", authenticate, like_enchere)
 router.patch("/dislike-enchere/:id/:hostID", authenticate, dislike_enchere)
 
+router.post("/upload", upload.array("files"), (req, res) => console.log(req.body))
+
+
 module.exports = router

@@ -9,6 +9,9 @@ exports.create_enchere = async (req, res) => {
     try {
         const files = req.files
 
+        console.log(files)
+        console.log(req.body.title)
+
         if (!isEmpty(files))
             req.body.medias = req.files.map(file => file.filename)
 
@@ -39,7 +42,7 @@ exports.get_enchere = async (req, res) => {
 //-------------@return all articles -----------------------------
 exports.get_all_encheres = async (req, res) => {
     try {
-        const encheres = await EnchereModel.find().sort({ createdAt: -1 })
+        const encheres = await EnchereModel.find().sort({ createdAt: -1 }).populate("sellerID")
         if (!encheres) throw "Une erreur est survenue au niveau du serveur lors de la recuperation des enchères."
         res.send({ response: encheres })
     } catch (error) {
@@ -183,14 +186,14 @@ exports.search_result = async (req, res) => {
 
     try {
         const { search_text, search_by_filter } = req.body
-        const encheres = await EnchereModel.find()
+        const encheres = await EnchereModel.find().sort({ createdAt: -1 })
 
         if (!isEmpty(encheres)) {
             let search_result = []
 
 
             for (const enchere of encheres) {
-                if (search_text.trim()) {
+                if (search_text && search_text.trim()) {
                     if (enchere.title.toLowerCase().trim().match(search_text.toLowerCase().trim()) || enchere.description.toLowerCase().trim().match(search_text.toLowerCase().trim())) {
                         search_result.push(enchere)
                     }
@@ -238,7 +241,7 @@ exports.search_result = async (req, res) => {
                 }
             }
 
-            res.send(search_result)
+            res.send({ response: search_result })
         } else {
             res.send({ message: "Aucune enchère n'existe." })
         }

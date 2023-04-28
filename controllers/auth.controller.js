@@ -48,19 +48,16 @@ exports.login = async (req, res) => {
     try {
         const { phone } = req.body
 
-        const error = req.error
-        if (!isEmpty(error)) return res.status(401).send({ message: error })
-
         //find user by phone number
         const user = await UserModel.findOne({ phone })
 
         //if user doesn't exist
-        if (isEmpty(user)) return res.status(401).json({ message: "E-mail ou mot de passe incorrect." })
+        if (isEmpty(user)) throw "Numéro de téléphone ou mot de passe incorrect."
 
         //check if password is right
         const passwordMatched = bcrypt.compare(req.body.password, user.password)
         if (!passwordMatched)
-            return res.status(401).json({ message: `E-mail ou mot de passe est incorrect.` })
+            throw `Numéro de téléphone ou mot de passe est incorrect.`
 
         // Create token JWT who expired in 3hours
         const token = JsonWebToken.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "3h" })
@@ -71,10 +68,56 @@ exports.login = async (req, res) => {
         res.status(200).json({ token, response: rest })
 
     } catch (error) {
-        res.status(500).send({ message: error.message })
+        res.status(500).send({ message: error })
     }
 
 }
+
+
+// exports.login = (req, res) => {
+//     const { phone, password } = req.body;
+
+//     UserModel.findOne({ phone })
+//         .then((user) => {
+//             if (!user) {
+//                 return res.status(404).json({
+//                     message: "Numéro de téléphone ou mot de passe incorrect.",
+//                 });
+//             }
+
+//             bcrypt
+//                 .compare(password, user.password)
+//                 .then((valid) => {
+//                     if (!valid) {
+//                         return res.status(400).json({
+//                             message: "Numéro de téléphone ou mot de passe incorrect.",
+//                         });
+//                     }
+
+
+
+//                     UserModel.findById(user._id,)
+//                         .select("-password")
+//                         .then((user) => {
+
+//                             if (!user) res.status(404).send({ message: "Numéro de téléphone ou mot de passe incorrect." })
+
+//                             const token = JsonWebToken.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "3h" })
+//                             // Retour de la réponse avec le token et l'employé connecté
+//                             res.status(200).json({ token, response: user })
+//                         })
+//                         .catch((error) => {
+//                             res.status(500).send({ message: error })
+//                         });
+//                 })
+//                 .catch((error) => {
+//                     res.status(500).send({ message: error })
+//                 });
+//         })
+//         .catch((error) => {
+//             res.status(500).send({ message: error })
+//         });
+// };
 
 //----------- @return "logged user's data" ------------------
 //when user is logged we retrieve the licenseKey from his datas and compare it with his input licenseKey
