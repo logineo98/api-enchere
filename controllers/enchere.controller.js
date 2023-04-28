@@ -193,7 +193,7 @@ exports.search_result = async (req, res) => {
 
 
             for (const enchere of encheres) {
-                if (search_text && search_text.trim()) {
+                if (search_text?.trim()) {
                     if (enchere.title.toLowerCase().trim().match(search_text.toLowerCase().trim()) || enchere.description.toLowerCase().trim().match(search_text.toLowerCase().trim())) {
                         search_result.push(enchere)
                     }
@@ -203,7 +203,7 @@ exports.search_result = async (req, res) => {
                     if (!isEmpty(lieu)) {
                         const user = await UserModel.findById(enchere.sellerID)
 
-                        if (lieu.includes(user.town)) {
+                        if (lieu.includes(user.town.toLowerCase())) {
                             const enchere_verify = search_result.find(ench => ench._id == enchere._id)
 
                             if (enchere_verify === undefined) search_result.push(enchere)
@@ -212,7 +212,7 @@ exports.search_result = async (req, res) => {
 
                     if (!isEmpty(categories)) {
                         enchere.categories.forEach(category => {
-                            if (categories.includes(category)) {
+                            if (categories.includes(category.toLowerCase())) {
                                 const enchere_verify = search_result.find(ench => ench._id == enchere._id)
 
                                 if (enchere_verify === undefined) search_result.push(enchere)
