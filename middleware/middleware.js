@@ -12,7 +12,7 @@ exports.authenticate = async (req, res, next) => {
         let token = req.header("token")
 
         if (isEmpty(token))
-            throw "authentification impossible"
+            throw ""
 
 
         const data = JsonWebToken.verify(token, process.env.JWT_SECRET)

@@ -8,18 +8,16 @@ const EnchereModel = require("../models/enchere.model")
 
 exports.login_validation = async (req, res, next) => {
     try {
-        let errors
         const { phone, password } = req.body
 
-        if (phone && !regex.phone.test(phone)) errors = "Format du numéro incorrect."
-        if (isEmpty(phone)) errors = "Numéro ou mot de passe incorrect."
-        if (isEmpty(password)) errors = "Numéro ou mot de passe incorrect."
-        if (!isEmpty(password) && password.length < 6) errors = "Mot de passe trop court."
+        if (phone && !regex.phone.test(phone)) throw "Format du numéro incorrect."
+        if (isEmpty(phone) || phone === "") throw "Numéro ou mot de passe incorrect."
+        if (isEmpty(password) || password === "") throw "Numéro ou mot de passe incorrect."
+        if ((!isEmpty(password) || password !== "") && password.length < 6) throw "Mot de passe trop court."
 
-        req.error = errors
         next()
     } catch (error) {
-        res.status(500).json({ message: error.message })
+        res.status(500).json({ message: error })
     }
 }
 
@@ -40,23 +38,21 @@ exports.licenseActivation_validation = async (req, res, next) => {
 
 exports.update_user_validation = async (req, res, next) => {
     try {
-        let errors
-        const { email, phone, password } = req.body
-
-        if (!isValidObjectId(req.params.id)) errors = "ID fourni est incorrect ou invalide."
-
+        const { password, email } = req.body
+        if (!isValidObjectId(req.params.id)) throw "ID fourni est incorrect ou invalide."
+        console.log(req.body)
         const user = await UserModel.findById(req.params.id)
 
-        if (isEmpty(user)) errors = "Cet utilisateur n'existe pas."
-        if (isEmpty(email)) errors = "Veuillez renseigner un e-mail."
-        if (isEmpty(phone)) errors = "Veuillez renseigner un numero de téléphone."
-        if (password === "") errors = "Veuillez renseigner un mot de passe."
-        else if (!isEmpty(password) && password.length < 6) errors = "Mot de passe trop court."
+        if (isEmpty(user)) throw "Cet utilisateur n'existe pas."
+        if (password === "") throw "Veuillez renseigner un mot de passe."
+        else if (!isEmpty(password) && password.length < 6) throw "Mot de passe trop court."
 
-        req.error = errors
+        if (email === "") throw "Un email est requis."
+        if (email && !regex.email.test(email?.trim())) throw "Format d'email incorrect."
+
         next()
     } catch (error) {
-        res.status(500).send({ message: error.message })
+        res.status(500).send({ message: error })
     }
 }
 
