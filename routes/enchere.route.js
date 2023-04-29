@@ -6,7 +6,9 @@ const { create_enchere_validation, update_enchere_validation } = require('../uti
 
 const router = require('express').Router()
 
-router.post("/", upload.array('files', upload_files_constants.MAX_FILES_TO_UPLOAD), authenticate, create_enchere_validation, create_enchere)
+// router.post("/", upload.array('files', upload_files_constants.MAX_FILES_TO_UPLOAD), authenticate, create_enchere_validation, create_enchere)
+router.post("/upload_create", upload.array('file', upload_files_constants.MAX_FILES_TO_UPLOAD), (req, res) => { res.send({ response: req.files.map(file => file.filename) }) })
+router.post("/", authenticate, create_enchere_validation, create_enchere)
 router.get("/:id/:hostID", authenticate, get_enchere)
 router.get("/:hostID", authenticate, get_all_encheres)
 router.put("/:id/:hostID", upload.array('files', upload_files_constants.MAX_FILES_TO_UPLOAD), authenticate, update_enchere_validation, update_enchere)
@@ -16,8 +18,5 @@ router.patch("/participate-in-enchere/:id/:hostID", authenticate, participate_in
 router.patch("/search/:hostID", authenticate, search_result)
 router.patch("/like-enchere/:id/:hostID", authenticate, like_enchere)
 router.patch("/dislike-enchere/:id/:hostID", authenticate, dislike_enchere)
-
-router.post("/upload", upload.array("files"), (req, res) => console.log(req.body))
-
 
 module.exports = router

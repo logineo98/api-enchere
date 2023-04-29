@@ -131,21 +131,21 @@ exports.create_enchere_validation = async (req, res, next) => {
 
         if (hostID === "" || isEmpty(hostID)) throw "Identifiant utilisateur invalide ou incorrect."
 
-        if (isEmpty(title)) errors = { ...errors, title: "Veuillez inserer le titre de l'enchère." }
-        if (isEmpty(description)) errors = { ...errors, description: "Veuillez inserer la description de l'enchère." }
+        if (isEmpty(title)) errors = { ...errors, title: "Veuillez renseigner le titre de l'enchère." }
+        if (isEmpty(description)) errors = { ...errors, description: "Veuillez renseigner la description de l'enchère." }
 
-        if (isEmpty(expiration_time)) errors = { ...errors, description: "Veuillez inserer la durée de l'enchère" }
+        if (isEmpty(expiration_time)) errors = { ...errors, description: "Veuillez renseigner la durée d'expiration de l'enchère" }
 
-        if (isEmpty(started_price)) errors = { ...errors, started_price: "Veuillez inserer le prix de depart de l'enchère." }
+        if (isEmpty(started_price)) errors = { ...errors, started_price: "Veuillez renseigner le prix de depart de l'enchère." }
         else if (!isEmpty(started_price) && started_price < 500) errors = { ...errors, started_price: "Le prix de depart de l'enchère doit être superieur ou égale à 500 fcfa." }
 
-        if (isEmpty(increase_price)) errors = { ...errors, increase_price: "Veuillez inserer le prix d'incrementation de l'enchère." }
+        if (isEmpty(increase_price)) errors = { ...errors, increase_price: "Veuillez renseigner le prix d'incrementation de l'enchère." }
         else if (!isEmpty(increase_price) && increase_price < 500) errors = { ...errors, increase_price: "Le prix d'incrementation de l'enchère doit être superieur ou égale à 500 fcfa." }
 
         if (isEmpty(categories)) errors = { ...errors, categories: "Veuillez choisir au moins une categorie pour votre enchère." }
 
         if (errors !== empty_error) throw errors
-        next()
+        else next()
     } catch (error) {
         res.status(500).json({ message: error })
     }

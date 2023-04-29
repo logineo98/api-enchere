@@ -19,6 +19,7 @@ app.use("/api/enchere", require("./routes/enchere.route"))
 
 //upload files error handler
 app.use((err, req, res, next) => {
+    console.log(err)
     if (err.code === "LIMIT_FILE_SIZE") {
         res.status(400).send({ message: `Désolé, Désolé la taille d'un fichier (image ou video) ne doit pas depasser ${convertOctetsToMo(upload_files_constants.MAX_SIZE)}` })
     } else if (err.code === "LIMIT_FILE_COUNT") {

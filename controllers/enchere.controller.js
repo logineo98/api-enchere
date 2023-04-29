@@ -9,15 +9,14 @@ exports.create_enchere = async (req, res) => {
     try {
         const files = req.files
 
-        console.log(files)
-        console.log(req.body.title)
-
         if (!isEmpty(files))
             req.body.medias = req.files.map(file => file.filename)
 
         req.body.sellerID = req.body.hostID
         const enchere = new EnchereModel(req.body)
         const saved_data = await enchere.save()
+        if (!saved_data) throw "Une erreur est survenue au niveau du serveur lors de la création de l'enchère."
+
         res.status(200).send({ response: saved_data, message: "Article mis en enchere avec succès mais en état d'attente patienter le temps que nous verifions la conformité de l'article avant de le mettre en enchère. Merci" })
     } catch (error) {
         res.status(500).send({ message: error })
