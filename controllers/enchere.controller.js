@@ -152,7 +152,7 @@ exports.participate_in_enchere = async (req, res) => {
 
         // si l'encherisseur a choisi le prix de reserve, l'enchère sera fermée
         if (reserve_price && !isEmpty(reserve_price)) {
-            enchere.history.push({ buyerID, reserve_price: true, montant: enchere.reserve_price })
+            enchere.history.push({ buyerID, reserve_price: true, montant: enchere.reserve_price, date: new Date() })
             enchere.enchere_status = "closed"
 
             const enchere_after_participation = await enchere.save()
@@ -164,12 +164,12 @@ exports.participate_in_enchere = async (req, res) => {
             if (enchere.history.length !== 0) {
                 const get_last_encherisseur = enchere.history[enchere.history.length - 1]
 
-                enchere.history.push({ buyerID, montant: get_last_encherisseur.montant + montant })
+                enchere.history.push({ buyerID, montant: get_last_encherisseur.montant + montant, date: new Date() })
                 const enchere_after_participation = await enchere.save()
                 if (!enchere_after_participation) throw "Une erreur est survenue au niveau du serveur lors de la participation à l'enchère."
                 res.send({ response: enchere_after_participation })
             } else {
-                enchere.history.push({ buyerID, montant: enchere.started_price + montant })
+                enchere.history.push({ buyerID, montant: enchere.started_price + montant, date: new Date() })
                 const enchere_after_participation = await enchere.save()
                 if (!enchere_after_participation) throw "Une erreur est survenue au niveau du serveur lors de la participation à l'enchère."
                 res.send({ response: enchere_after_participation })

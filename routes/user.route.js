@@ -1,14 +1,14 @@
 const { login, register, checking, profile, licenseActivation } = require('../controllers/auth.controller')
 const { get_user, get_users, update_user, delete_user, send_invitation, forgot_password, confirm_forgot_recovery_code, reset_forgot_password } = require('../controllers/user.controller');
 const { authenticate } = require('../middleware/middleware');
-const { login_validation, licenseActivation_validation, update_user_validation } = require('../utils/validations');
+const { login_validation, update_user_validation } = require('../utils/validations');
 
 const router = require('express').Router()
 
 router.get("/get/profile", authenticate, profile)
 router.post("/checking", checking)
 router.post("/login", login_validation, login)
-router.post("/activation-license", authenticate, licenseActivation_validation, licenseActivation)
+router.post("/activation-license", authenticate, licenseActivation)
 router.post("/forgot_password", forgot_password)
 router.post("/confirm_forgot_recovery_code", confirm_forgot_recovery_code)
 router.post("/reset_forgot_password", reset_forgot_password)

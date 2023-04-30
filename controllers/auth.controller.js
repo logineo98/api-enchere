@@ -3,6 +3,7 @@ const UserModel = require("../models/user.model")
 const { isEmpty, genKey, sendSMS } = require("../utils/functions")
 const bcrypt = require('bcrypt')
 const { register_validation, register_error_validation } = require("../utils/validations")
+const { isValidObjectId } = require("mongoose")
 
 
 //----------- @return boolean depending on whether the user token is valid or not ------------------
@@ -65,7 +66,7 @@ exports.login = async (req, res) => {
         let { password, ...rest } = user._doc
 
         // Retour de la réponse avec le token et l'employé connecté
-        res.status(200).json({ token, response: rest })
+        res.status(200).json({ token, response: rest, message: rest.license_status ? "Vous êtes connecté." : !rest.license_status && "Activer votre compte." })
 
     } catch (error) {
         res.status(500).send({ message: error })
@@ -74,50 +75,7 @@ exports.login = async (req, res) => {
 }
 
 
-// exports.login = (req, res) => {
-//     const { phone, password } = req.body;
 
-//     UserModel.findOne({ phone })
-//         .then((user) => {
-//             if (!user) {
-//                 return res.status(404).json({
-//                     message: "Numéro de téléphone ou mot de passe incorrect.",
-//                 });
-//             }
-
-//             bcrypt
-//                 .compare(password, user.password)
-//                 .then((valid) => {
-//                     if (!valid) {
-//                         return res.status(400).json({
-//                             message: "Numéro de téléphone ou mot de passe incorrect.",
-//                         });
-//                     }
-
-
-
-//                     UserModel.findById(user._id,)
-//                         .select("-password")
-//                         .then((user) => {
-
-//                             if (!user) res.status(404).send({ message: "Numéro de téléphone ou mot de passe incorrect." })
-
-//                             const token = JsonWebToken.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "3h" })
-//                             // Retour de la réponse avec le token et l'employé connecté
-//                             res.status(200).json({ token, response: user })
-//                         })
-//                         .catch((error) => {
-//                             res.status(500).send({ message: error })
-//                         });
-//                 })
-//                 .catch((error) => {
-//                     res.status(500).send({ message: error })
-//                 });
-//         })
-//         .catch((error) => {
-//             res.status(500).send({ message: error })
-//         });
-// };
 
 //----------- @return "logged user's data" ------------------
 //when user is logged we retrieve the licenseKey from his datas and compare it with his input licenseKey
@@ -126,22 +84,24 @@ exports.licenseActivation = async (req, res) => {
     try {
         const { licenseKey, userID } = req.body
 
-        const error = req.error;
-        if (!isEmpty(error)) return res.status(401).send({ message: error });
+        if (!isValidObjectId(userID)) throw "ID fourni est incorrect ou invalide."
+        if (!licenseKey || licenseKey === "") throw "Un code d'activation est requis."
+
+        console.log("first")
 
         const user = await UserModel.findById(userID).select("-password")
-        if (isEmpty(user)) return res.status(401).json({ message: "Ce compte n'existe pas." })
+        if (isEmpty(user)) throw "Ce compte n'existe pas."
 
         const isLicenseValid = licenseKey === user?.licenseKey ? true : false
-        if (!isLicenseValid) return res.status(404).json({ message: "Votre code est incorrect" })
+        if (!isLicenseValid) throw "Le code d'activation est incorrect."
 
         const updated = await UserModel.findByIdAndUpdate(userID, { $set: { license_status: true } }, { new: true }).select("-password")
-        if (isEmpty(updated)) return res.status(404).json({ message: "Echec d'activation de votre code" })
-
-        res.status(200).json({ response: updated, message: "Activation du code reussie!" })
+        if (isEmpty(updated)) throw "Echec d'activation de votre code."
+        res.status(200).json({ response: updated, message: "Compte activé." })
 
     } catch (error) {
-        res.status(500).send({ message: error.message });
+        console.log(error)
+        res.status(500).send({ message: error });
     }
 }
 

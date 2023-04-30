@@ -133,11 +133,11 @@ exports.forgot_password = async (req, res) => {
             if (isEmpty(updated)) throw "Erreur de reinitialisation du mot de passe"
 
 
-            // let message = `Votre code de recuperation est: ${token}`
-            // const sms = await sendSMS("0022373030732", "0022373030732", message)
-            // if (isEmpty(sms)) throw "Erreur d'envoie du code de recuperation"
+            let message = `Votre code de recuperation est: ${token}`
+            const sms = await sendSMS("0022373030732", "0022373030732", message)
+            if (isEmpty(sms)) throw "Erreur d'envoie du code de recuperation"
 
-            res.status(200).json({ response: token, message: "Code de recuperation envoyé" })
+            res.status(200).json({ response: { token, phone }, message: "Code de recuperation envoyé" })
         }
     } catch (error) {
         res.status(500).send({ message: error })
@@ -152,24 +152,24 @@ exports.confirm_forgot_recovery_code = async (req, res) => {
     try {
         const { code, phone } = req.body
 
-        if (isEmpty(code) || code === "") throw "Veuillez renseigner le code de récuperation"
+        if (isEmpty(code) || code === "") throw "Le code de récupération est requis."
 
         const user = await UserModel.findOne({ phone })
-        if (isEmpty(user)) throw "Votre numéro est incorrect!"
+        if (isEmpty(user)) throw "Le code est incorrect."
 
         const data = jwt.verify(user?.forgot_password_token, process.env.JWT_SECRET)
-        if (isEmpty(data.token)) throw "Votre code de recuperation est expiré"
+        if (isEmpty(data.token)) throw "Le code a expiré."
 
         const expDate = new Date(data.exp * 1000)
 
         if (expDate < new Date())
-            throw "Votre code de recuperation est invalide/expiré"
+            throw "Le code de récupération est invalide/expiré"
 
         if (code !== data.token)
-            throw "Votre code de recuperation est invalide/expiré"
+            throw "Le code de recuperation est invalide/expiré"
 
         let ans = code === data.token ? true : false;
-        res.send({ response: ans, message: ans ? "Votre code est correct! Vous pouvez réinitialiser votre mot de passe maintenant." : "" })
+        res.send({ response: { code_status: ans, phone }, message: ans ? "Code est correct." : "" })
     } catch (error) {
         res.status(500).send({ message: error })
     }
@@ -179,8 +179,8 @@ exports.confirm_forgot_recovery_code = async (req, res) => {
 exports.reset_forgot_password = async (req, res) => {
     try {
         let { password, confirm, phone } = req.body
-        if (isEmpty(password) || password === "") throw "Veuillez renseigner un mot de passe."
-        if (password && password.length < 6) throw "Mot de passe trop court! Saissez 6 caractères au minimum."
+        if (isEmpty(password) || password === "") throw "Un mot de passe est requis."
+        if (password && password.length < 6) throw "Taille mot de passe trop court. Minimum: 6 caractères."
         if (!isEqual(password, confirm)) throw "Les mots de passe ne se correspondent pas."
 
 
@@ -188,10 +188,10 @@ exports.reset_forgot_password = async (req, res) => {
         const salt = await bcrypt.genSalt(10)
         password = await bcrypt.hash(password, salt)
 
-        const user = await UserModel.findOneAndUpdate({ phone }, { $set: { password } }, { new: true })
+        const user = await UserModel.findOneAndUpdate({ phone }, { $set: { password } }, { new: true }).select("-password")
         if (isEmpty(user)) throw "Erreur lors de la réinitialisation du mot de passe."
 
-        res.status(200).json({ response: user, message: "Mot de passe modifié avec succès." })
+        res.status(200).json({ response: user, message: "Mot de passe modifié." })
     } catch (error) {
         res.status(500).send({ message: error })
     }
