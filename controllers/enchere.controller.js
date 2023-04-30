@@ -7,11 +7,6 @@ const UserModel = require("../models/user.model")
 //-------------@return article created data --------------------
 exports.create_enchere = async (req, res) => {
     try {
-        const files = req.files
-
-        if (!isEmpty(files))
-            req.body.medias = req.files.map(file => file.filename)
-
         req.body.sellerID = req.body.hostID
         const enchere = new EnchereModel(req.body)
         const saved_data = await enchere.save()
