@@ -2,18 +2,16 @@ const { isValidObjectId } = require("mongoose")
 const EnchereModel = require("../models/enchere.model")
 const { isEmpty } = require("../utils/functions")
 const fs = require("fs")
+const UserModel = require("../models/user.model")
 
 //-------------@return article created data --------------------
 exports.create_enchere = async (req, res) => {
     try {
-        const files = req.files
-
-        if (!isEmpty(files))
-            req.body.medias = req.files.map(file => file.filename)
-
         req.body.sellerID = req.body.hostID
         const enchere = new EnchereModel(req.body)
         const saved_data = await enchere.save()
+        if (!saved_data) throw "Une erreur est survenue au niveau du serveur lors de la création de l'enchère."
+
         res.status(200).send({ response: saved_data, message: "Article mis en enchere avec succès mais en état d'attente patienter le temps que nous verifions la conformité de l'article avant de le mettre en enchère. Merci" })
     } catch (error) {
         res.status(500).send({ message: error })
@@ -38,20 +36,19 @@ exports.get_enchere = async (req, res) => {
 //-------------@return all articles -----------------------------
 exports.get_all_encheres = async (req, res) => {
     try {
-        const encheres = await EnchereModel.find()
+        const encheres = await EnchereModel.find().sort({ createdAt: -1 }).populate("sellerID")
         if (!encheres) throw "Une erreur est survenue au niveau du serveur lors de la recuperation des enchères."
         res.send({ response: encheres })
     } catch (error) {
         res.status(500).send({ message: error })
     }
-
 }
 
 //----------@return enchere updated data ----------------------
 //we retrieve enchere data by it id and update it
 exports.update_enchere = async (req, res) => {
     try {
-        const { title, description, categories, started_price, increase_price, reserve_price, expiration_time, enchere_type, enchere_status, reject_motif, trash } = req.body
+        const { title, description, categories, started_price, increase_price, reserve_price, expiration_time, enchere_type, enchere_status, reject_motif, delivery_options, trash } = req.body
         const files = req.files
         const enchere = await EnchereModel.findById(req.params.id)
 
@@ -86,6 +83,7 @@ exports.update_enchere = async (req, res) => {
         if (enchere_type) enchere.enchere_type = enchere_type
         if (enchere_status) enchere.enchere_status = enchere_status
         if (reject_motif) enchere.reject_motif = reject_motif
+        if (delivery_options) enchere.delivery_options = delivery_options
         if (trash) enchere.trash = trash
 
         const enchere_after_update = await enchere.save()
@@ -149,7 +147,7 @@ exports.participate_in_enchere = async (req, res) => {
 
         // si l'encherisseur a choisi le prix de reserve, l'enchère sera fermée
         if (reserve_price && !isEmpty(reserve_price)) {
-            enchere.history.push({ buyerID, reserve_price: true, montant: enchere.reserve_price })
+            enchere.history.push({ buyerID, reserve_price: true, montant: enchere.reserve_price, date: new Date() })
             enchere.enchere_status = "closed"
 
             const enchere_after_participation = await enchere.save()
@@ -161,12 +159,12 @@ exports.participate_in_enchere = async (req, res) => {
             if (enchere.history.length !== 0) {
                 const get_last_encherisseur = enchere.history[enchere.history.length - 1]
 
-                enchere.history.push({ buyerID, montant: get_last_encherisseur.montant + montant })
+                enchere.history.push({ buyerID, montant: get_last_encherisseur.montant + montant, date: new Date() })
                 const enchere_after_participation = await enchere.save()
                 if (!enchere_after_participation) throw "Une erreur est survenue au niveau du serveur lors de la participation à l'enchère."
                 res.send({ response: enchere_after_participation })
             } else {
-                enchere.history.push({ buyerID, montant: enchere.started_price + montant })
+                enchere.history.push({ buyerID, montant: enchere.started_price + montant, date: new Date() })
                 const enchere_after_participation = await enchere.save()
                 if (!enchere_after_participation) throw "Une erreur est survenue au niveau du serveur lors de la participation à l'enchère."
                 res.send({ response: enchere_after_participation })
@@ -176,4 +174,107 @@ exports.participate_in_enchere = async (req, res) => {
         res.status(500).send({ message: error.message })
     }
 
+}
+
+exports.search_result = async (req, res) => {
+
+    try {
+        const { search_text, search_by_filter } = req.body
+        const encheres = await EnchereModel.find().sort({ createdAt: -1 })
+
+        if (!isEmpty(encheres)) {
+            let search_result = []
+
+
+            for (const enchere of encheres) {
+                if (search_text?.trim()) {
+                    if (enchere.title.toLowerCase().trim().match(search_text.toLowerCase().trim()) || enchere.description.toLowerCase().trim().match(search_text.toLowerCase().trim())) {
+                        search_result.push(enchere)
+                    }
+                } else {
+                    const { lieu, categories, date, montant } = search_by_filter
+
+                    if (!isEmpty(lieu)) {
+                        const user = await UserModel.findById(enchere.sellerID)
+
+                        if (lieu.includes(user.town.toLowerCase())) {
+                            const enchere_verify = search_result.find(ench => ench._id == enchere._id)
+
+                            if (enchere_verify === undefined) search_result.push(enchere)
+                        }
+                    }
+
+                    if (!isEmpty(categories)) {
+                        enchere.categories.forEach(category => {
+                            if (categories.includes(category.toLowerCase())) {
+                                const enchere_verify = search_result.find(ench => ench._id == enchere._id)
+
+                                if (enchere_verify === undefined) search_result.push(enchere)
+                            }
+                        })
+                    }
+
+                    if (!isEmpty(date)) {
+                        const date_f = new Date(date).getTime()
+                        const enchere_createdAt = enchere.createdAt.getTime()
+
+                        if (enchere_createdAt <= date_f) {
+                            const enchere_verify = search_result.find(ench => ench._id == enchere._id)
+
+                            if (enchere_verify === undefined) search_result.push(enchere)
+                        }
+                    }
+
+                    if (!isEmpty(montant)) {
+                        if (enchere.started_price <= montant) {
+                            const enchere_verify = search_result.find(ench => ench._id == enchere._id)
+
+                            if (enchere_verify === undefined) search_result.push(enchere)
+                        }
+                    }
+                }
+            }
+
+            res.send({ response: search_result })
+        } else {
+            res.send({ message: "Aucune enchère n'existe." })
+        }
+    } catch (error) {
+        res.status(500).send({ message: error })
+    }
+
+}
+
+exports.like_enchere = async (req, res) => {
+    try {
+        const { user_id } = req.body
+
+        if (!isValidObjectId(req.params.id) || !isValidObjectId(user_id)) {
+            return res.status(400).json({ message: "Désolé l'identifiant de l'utilisateur ou de l'enchère n'est pas correct !" })
+        }
+
+        const enchere_after_update = await EnchereModel.findByIdAndUpdate(req.params.id, { $addToSet: { likes: user_id } }, { new: true })
+        if (!enchere_after_update) throw "Désolé une erreur est survenue au niveau du serveur lors du like de l'enchère."
+
+        res.send({ response: enchere_after_update, message: "Enchère ajoutée aux favoris avec succès." })
+    } catch (error) {
+        res.status(500).send({ message: error })
+    }
+}
+
+exports.dislike_enchere = async (req, res) => {
+    try {
+        const { user_id } = req.body
+
+        if (!isValidObjectId(req.params.id) || !isValidObjectId(user_id)) {
+            return res.status(400).json({ message: "Désolé l'identifiant de l'utilisateur ou de l'enchère n'est pas correct !" })
+        }
+
+        const enchere_after_update = await EnchereModel.findByIdAndUpdate(req.params.id, { $pull: { likes: user_id } }, { new: true })
+        if (!enchere_after_update) throw "Désolé une erreur est survenue au niveau du serveur lors du like de l'enchère."
+
+        res.send({ response: enchere_after_update, message: "Enchère retirée aux favoris avec succès." })
+    } catch (error) {
+        res.status(500).send({ message: error })
+    }
 }

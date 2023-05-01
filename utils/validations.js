@@ -8,55 +8,36 @@ const EnchereModel = require("../models/enchere.model")
 
 exports.login_validation = async (req, res, next) => {
     try {
-        let errors
         const { phone, password } = req.body
 
-        if (phone && !regex.phone.test(phone)) errors = "Format du numéro incorrect."
-        if (isEmpty(phone)) errors = "Numéro ou mot de passe incorrect."
-        if (isEmpty(password)) errors = "Numéro ou mot de passe incorrect."
-        if (!isEmpty(password) && password.length < 6) errors = "Mot de passe trop court."
+        if (phone && !regex.phone.test(phone)) throw "Format du numéro incorrect."
+        if (isEmpty(phone) || phone === "") throw "Numéro ou mot de passe incorrect."
+        if (isEmpty(password) || password === "") throw "Numéro ou mot de passe incorrect."
+        if ((!isEmpty(password) || password !== "") && password.length < 6) throw "Mot de passe trop court."
 
-        req.error = errors
         next()
     } catch (error) {
-        res.status(500).json({ message: error.message })
-    }
-}
-
-exports.licenseActivation_validation = async (req, res, next) => {
-    try {
-        let errors
-        const { userID, licenseKey } = req.body
-
-        if (!isValidObjectId(userID)) errors = "ID fourni est incorrect ou invalide."
-        if (isEmpty(licenseKey)) errors = "Code non renseigner."
-
-        req.error = errors
-        next()
-    } catch (error) {
-        res.status(500).send({ message: error.message })
+        res.status(500).json({ message: error })
     }
 }
 
 exports.update_user_validation = async (req, res, next) => {
     try {
-        let errors
-        const { email, phone, password } = req.body
-
-        if (!isValidObjectId(req.params.id)) errors = "ID fourni est incorrect ou invalide."
-
+        const { password, email } = req.body
+        if (!isValidObjectId(req.params.id)) throw "ID fourni est incorrect ou invalide."
+        console.log(req.body)
         const user = await UserModel.findById(req.params.id)
 
-        if (isEmpty(user)) errors = "Cet utilisateur n'existe pas."
-        if (isEmpty(email)) errors = "Veuillez renseigner un e-mail."
-        if (isEmpty(phone)) errors = "Veuillez renseigner un numero de téléphone."
-        if (password === "") errors = "Veuillez renseigner un mot de passe."
-        else if (!isEmpty(password) && password.length < 6) errors = "Mot de passe trop court."
+        if (isEmpty(user)) throw "Cet utilisateur n'existe pas."
+        if (password === "") throw "Veuillez renseigner un mot de passe."
+        else if (!isEmpty(password) && password.length < 6) throw "Mot de passe trop court."
 
-        req.error = errors
+        if (email === "") throw "Un email est requis."
+        if (email && !regex.email.test(email?.trim())) throw "Format d'email incorrect."
+
         next()
     } catch (error) {
-        res.status(500).send({ message: error.message })
+        res.status(500).send({ message: error })
     }
 }
 
@@ -135,21 +116,21 @@ exports.create_enchere_validation = async (req, res, next) => {
 
         if (hostID === "" || isEmpty(hostID)) throw "Identifiant utilisateur invalide ou incorrect."
 
-        if (isEmpty(title)) errors = { ...errors, title: "Veuillez inserer le titre de l'enchère." }
-        if (isEmpty(description)) errors = { ...errors, description: "Veuillez inserer la description de l'enchère." }
+        if (isEmpty(title)) errors = { ...errors, title: "Veuillez renseigner le titre de l'enchère." }
+        if (isEmpty(description)) errors = { ...errors, description: "Veuillez renseigner la description de l'enchère." }
 
-        if (isEmpty(expiration_time)) errors = { ...errors, description: "Veuillez inserer la durée de l'enchère" }
+        if (isEmpty(expiration_time)) errors = { ...errors, description: "Veuillez renseigner la durée d'expiration de l'enchère" }
 
-        if (isEmpty(started_price)) errors = { ...errors, started_price: "Veuillez inserer le prix de depart de l'enchère." }
+        if (isEmpty(started_price)) errors = { ...errors, started_price: "Veuillez renseigner le prix de depart de l'enchère." }
         else if (!isEmpty(started_price) && started_price < 500) errors = { ...errors, started_price: "Le prix de depart de l'enchère doit être superieur ou égale à 500 fcfa." }
 
-        if (isEmpty(increase_price)) errors = { ...errors, increase_price: "Veuillez inserer le prix d'incrementation de l'enchère." }
+        if (isEmpty(increase_price)) errors = { ...errors, increase_price: "Veuillez renseigner le prix d'incrementation de l'enchère." }
         else if (!isEmpty(increase_price) && increase_price < 500) errors = { ...errors, increase_price: "Le prix d'incrementation de l'enchère doit être superieur ou égale à 500 fcfa." }
 
         if (isEmpty(categories)) errors = { ...errors, categories: "Veuillez choisir au moins une categorie pour votre enchère." }
 
         if (errors !== empty_error) throw errors
-        next()
+        else next()
     } catch (error) {
         res.status(500).json({ message: error })
     }
