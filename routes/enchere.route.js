@@ -11,7 +11,8 @@ router.post("/upload_create", upload.array('file', upload_files_constants.MAX_FI
 router.post("/", authenticate, create_enchere_validation, create_enchere)
 router.get("/:id/:hostID", authenticate, get_enchere)
 router.get("/:hostID", authenticate, get_all_encheres)
-router.put("/:id/:hostID", upload.array('files', upload_files_constants.MAX_FILES_TO_UPLOAD), authenticate, update_enchere_validation, update_enchere)
+router.put("/upload_edit", upload.array('file', upload_files_constants.MAX_FILES_TO_UPLOAD), (req, res) => { res.send({ response: req.files.map(file => file.filename) }) })
+router.put("/:id/:hostID", authenticate, update_enchere_validation, update_enchere)
 router.delete("/:id/:hostID", authenticate, delete_enchere)
 
 router.patch("/participate-in-enchere/:id/:hostID", authenticate, participate_in_enchere)

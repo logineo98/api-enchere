@@ -141,7 +141,7 @@ exports.update_enchere_validation = async (req, res, next) => {
         let empty_error = { title: "", description: "", started_price: "", increase_price: "", categories: "", enchere_type: "" }
         let errors = empty_error
 
-        let { title, description, started_price, increase_price, categories, enchere_type, expiration_time } = req.body
+        let { title, description, started_price, increase_price, categories, expiration_time } = req.body
 
         if (isEmpty(req.params.id)) throw "Identifiant de l'enchère invalide ou incorrect."
         if (isEmpty(req.params.hostID)) throw "Identifiant utilisateur invalide ou incorrect."
