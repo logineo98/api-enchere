@@ -48,45 +48,36 @@ exports.get_all_encheres = async (req, res) => {
 //we retrieve enchere data by it id and update it
 exports.update_enchere = async (req, res) => {
     try {
-        const { title, description, categories, started_price, increase_price, reserve_price, expiration_time, enchere_type, enchere_status, reject_motif, delivery_options, trash } = req.body
-        const files = req.files
+        const { old_img, new_img } = req.body
+
         const enchere = await EnchereModel.findById(req.params.id)
+        if (!enchere) throw "Aucune enchère correspondante n'a été trouvée."
 
-        if (!isEmpty(files)) {
-            const medias = enchere.medias
+        let medias = enchere.medias
 
+        if (old_img.length !== 0) {
             medias.forEach(media => {
-                const typeFile = media.split("-")[0]
-                let pathFilename = ""
+                if (!old_img.includes(media)) {
+                    const typeFile = media.split("-")[0]
+                    let pathFilename = ""
 
-                if (typeFile === "image") {
-                    pathFilename = `${__dirname}/../public/images/${media}`
-                } else if (typeFile === "video") {
-                    pathFilename = `${__dirname}/../public/videos/${media}`
+                    if (typeFile === "image") {
+                        pathFilename = `${__dirname}/../public/images/${media}`
+                    } else if (typeFile === "video") {
+                        pathFilename = `${__dirname}/../public/videos/${media}`
+                    }
+
+                    fs.unlink(pathFilename, (error) => {
+                        if (error) throw error
+                        console.log(`L'ancienne ${media} a été supprimée`)
+                    })
                 }
-
-                fs.unlink(pathFilename, (error) => {
-                    if (error) throw error
-                    console.log(`L'ancienne ${media} a été supprimée`)
-                })
             })
-
-            enchere.medias = files.map(file => file.filename)
         }
-        if (title) enchere.title = title
-        if (description) enchere.description = description
-        if (!isEmpty(categories)) enchere.categories = categories
-        if (started_price) enchere.started_price = started_price
-        if (increase_price) enchere.increase_price = increase_price
-        if (reserve_price) enchere.reserve_price = reserve_price
-        if (expiration_time) enchere.expiration_time = expiration_time
-        if (enchere_type) enchere.enchere_type = enchere_type
-        if (enchere_status) enchere.enchere_status = enchere_status
-        if (reject_motif) enchere.reject_motif = reject_motif
-        if (delivery_options) enchere.delivery_options = delivery_options
-        if (trash) enchere.trash = trash
 
-        const enchere_after_update = await enchere.save()
+        req.body.medias = new_img ? [...old_img, ...new_img] : [...old_img]
+
+        const enchere_after_update = await EnchereModel.findByIdAndUpdate(req.params.id, { ...req.body }, { new: true })
         if (!enchere_after_update) throw "Une erreur est survenue au niveau du serveur lors de la mise à de l'enchère."
 
         res.send({ response: enchere_after_update, message: "La mise à jour de l'enchère a été effectuée avec succès." })
