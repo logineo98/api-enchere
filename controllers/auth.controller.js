@@ -13,14 +13,14 @@ exports.checking = async (req, res) => {
         let token = req.header("token")
 
         const data = JsonWebToken.verify(token, process.env.JWT_SECRET)
-        if (isEmpty(data.id)) res.send(false)
+        if (isEmpty(data.id)) return res.status(200).send(false)
 
         const user = await UserModel.findById(data.id)
-        if (isEmpty(user)) return res.status(404).send(false)
+        if (isEmpty(user)) return res.status(200).send(false)
 
-        return res.send(true)
+        res.status(200).send(true)
     } catch (error) {
-        return res.status(500).send({ message: error.message })
+        return res.status(500).send({ message: false })
     }
 }
 
@@ -61,7 +61,7 @@ exports.login = async (req, res) => {
             throw `Numéro de téléphone ou mot de passe est incorrect.`
 
         // Create token JWT who expired in 3hours
-        const token = JsonWebToken.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "3h" })
+        const token = JsonWebToken.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "10s" })
 
         let { password, ...rest } = user._doc
 

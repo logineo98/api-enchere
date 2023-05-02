@@ -14,7 +14,7 @@ const enchere_sch = new mongoose.Schema({
     enchere_type: { type: String, enum: ["public", "private"], default: "public" },
     enchere_status: { type: String, enum: ["published", "pending", "rejected", "closed"], default: "pending" },
     reject_motif: { type: String, trim: true },
-    delivery_options: { teliman: { type: Boolean }, own: { type: Boolean }, deliveryPrice: { type: Number } },
+    delivery_options: { teliman: { type: Boolean }, own: { type: Boolean }, cost: { type: Boolean }, deliveryPrice: { type: Number } },
     history: [{
         buyerID: { type: mongoose.Types.ObjectId, ref: "User", required: true },
         montant: { type: Number, required: true },
