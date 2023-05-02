@@ -61,7 +61,7 @@ exports.login = async (req, res) => {
             throw `Numéro de téléphone ou mot de passe est incorrect.`
 
         // Create token JWT who expired in 3hours
-        const token = JsonWebToken.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "10s" })
+        const token = JsonWebToken.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "3h" })
 
         let { password, ...rest } = user._doc
 
