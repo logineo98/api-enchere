@@ -44,7 +44,7 @@ exports.get_users = async (req, res) => {
     try {
         const user = await UserModel.find().sort({ createdAt: -1 }).select("-password")
 
-        res.status(401).json({ response: user, message: "" })
+        res.status(200).json({ response: user, message: "" })
     } catch (error) {
         res.status(500).send({ message: error.message })
     }

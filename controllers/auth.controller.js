@@ -4,6 +4,7 @@ const { isEmpty, genKey, sendSMS } = require("../utils/functions")
 const bcrypt = require('bcrypt')
 const { register_validation, register_error_validation } = require("../utils/validations")
 const { isValidObjectId } = require("mongoose")
+const { ParticipantListInstance } = require("twilio/lib/rest/conversations/v1/conversation/participant")
 
 
 //----------- @return boolean depending on whether the user token is valid or not ------------------
@@ -47,18 +48,37 @@ exports.profile = async (req, res) => {
 //by default his token expire in 3 hours
 exports.login = async (req, res) => {
     try {
-        const { phone } = req.body
+        console.log(req.body)
+        // const { phone } = req.body
 
-        //find user by phone number
-        const user = await UserModel.findOne({ phone })
+        // //find user by phone number
+        // const user = await UserModel.findOne({ phone })
 
-        //if user doesn't exist
-        if (isEmpty(user)) throw "Numéro de téléphone ou mot de passe incorrect."
+        // //if user doesn't exist
+        // if (isEmpty(user)) throw "Numéro de téléphone ou mot de passe incorrect."
 
-        //check if password is right
-        const passwordMatched = bcrypt.compare(req.body.password, user.password)
-        if (!passwordMatched)
-            throw `Numéro de téléphone ou mot de passe est incorrect.`
+        // //check if password is right
+        // const passwordMatched = bcrypt.compare(req.body.password, user.password)
+        // if (!passwordMatched)
+        //     throw `Numéro de téléphone ou mot de passe est incorrect.`
+
+
+        var { email, phone, dashboard } = req.body;
+        if (email) email = req.body.email.toLowerCase().trim();
+        if (phone) phone = req.body.phone.trim();
+
+        var user = null;
+        if (email !== "" && (dashboard || dashboard !== "")) user = await UserModel.findOne({ email });
+        else if (phone) user = await UserModel.findOne({ phone });
+
+
+        let msg = email ? "Nom d'utilisateur" : phone && "Numero de téléphone";
+
+        if (isEmpty(user) || user === null) throw `${msg} ou le mot de passe est incorrect.`;
+
+
+        const pass = bcrypt.compare(req.body.password, user.password);
+        if (!pass) throw `${msg} ou le mot de passe est incorrect.`;
 
         // Create token JWT who expired in 3hours
         const token = JsonWebToken.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "3h" })

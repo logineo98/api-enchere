@@ -14,7 +14,9 @@ const user_sch = new mongoose.Schema({
     licenseKey: { type: String },
     license_status: { type: Boolean, default: false },
     forgot_password_token: { type: String },
-    trash: { type: Boolean, default: false }
+    trash: { type: Boolean, default: false },
+    notification_token: { type: String },
+    admin: { type: Boolean, default: false }
 }, { timestamps: true })
 
 // play function before save into display: 'block',
