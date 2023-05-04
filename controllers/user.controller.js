@@ -199,3 +199,25 @@ exports.reset_forgot_password = async (req, res) => {
     }
 
 }
+
+exports.getAllFirebaseToken = async (req, res) => {
+    try {
+        const users = await UserModel.find()
+        let allToken = []
+
+        if (!isEmpty(users)) {
+            users.forEach(user => {
+                if (user.notification_token) {
+                    if (!allToken.includes(user.notification_token)) allToken.push(user.notification_token)
+                }
+            })
+
+            res.send({ response: allToken })
+        } else {
+            return res.send({ response: "Aucun utilisateur n'existe pour le moment !" })
+        }
+
+    } catch (error) {
+        res.status(500).send({ message: error })
+    }
+}

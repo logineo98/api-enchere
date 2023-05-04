@@ -5,8 +5,15 @@ const path = require("path")
 const bodyParser = require("body-parser")
 const { upload_files_constants } = require("./utils/constants")
 const { convertOctetsToMo } = require("./utils/functions")
+const admin = require("firebase-admin")
+const serviceAccount = require("./serviceAccountKey.json")
 require("./config/db")
+
 const app = express()
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+})
 
 app.use("/api/public", express.static(path.join(__dirname, "public")))
 app.use(bodyParser.json())
@@ -16,6 +23,7 @@ app.use(cors())
 //use of routers here
 app.use("/api/user", require("./routes/user.route"))
 app.use("/api/enchere", require("./routes/enchere.route"))
+app.use("/api/notification", require("./routes/notification.route"))
 
 //upload files error handler
 app.use((err, req, res, next) => {

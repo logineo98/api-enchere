@@ -20,12 +20,12 @@ const user_sch = new mongoose.Schema({
     admin: { type: Boolean, default: false }
 }, { timestamps: true })
 
-// play function before save into display: 'block',
-user_sch.pre("save", async function (next) {
-    const salt = await bcrypt.genSalt()
-    this.password = await bcrypt.hash(this.password, salt)
-    next()
-})
+// // play function before save into display: 'block',
+// user_sch.pre("save", async function (next) {
+//     const salt = await bcrypt.genSalt()
+//     this.password = await bcrypt.hash(this.password, salt)
+//     next()
+// })
 
 const UserModel = mongoose.model("User", user_sch)
 
