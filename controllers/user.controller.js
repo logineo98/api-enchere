@@ -17,10 +17,12 @@ exports.update_user = async (req, res) => {
 
         const user = await UserModel.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true }).select("-password")
 
+        console.log(user)
 
         if (isEmpty(user)) throw "Mise à jour de cet utilisateur impossible"
         res.status(200).json({ response: user, message: "Informations de l'utilisateur mise à jour." })
     } catch (error) {
+        console.log(error.message || error)
         res.status(500).send({ message: error })
     }
 }

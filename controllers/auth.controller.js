@@ -68,13 +68,13 @@ exports.login = async (req, res) => {
         if (phone) phone = req.body.phone.trim();
 
         var user = null;
-        if (email !== "" && (dashboard || dashboard !== "")) user = await UserModel.findOne({ email });
+        if (email && email !== "" && (dashboard || dashboard !== "")) user = await UserModel.findOne({ email });
         else if (phone) user = await UserModel.findOne({ phone });
 
 
         let msg = email ? "Nom d'utilisateur" : phone && "Numero de téléphone";
 
-        if (isEmpty(user) || user === null) throw `${msg} ou le mot de passe est incorrect.`;
+        if (isEmpty(user) || user === null) throw `${msg} ou le mot de passe est incorrect. `;
 
 
         const pass = bcrypt.compare(req.body.password, user.password);

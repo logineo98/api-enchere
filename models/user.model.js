@@ -16,6 +16,7 @@ const user_sch = new mongoose.Schema({
     forgot_password_token: { type: String },
     trash: { type: Boolean, default: false },
     notification_token: { type: String },
+    rejected: { type: Boolean, default: false },
     admin: { type: Boolean, default: false }
 }, { timestamps: true })
 
