@@ -2,6 +2,7 @@ const licenseKey = require("license-key-gen");
 const nodemailer = require("nodemailer");
 const Generator = require("license-key-generator");
 const { Vonage } = require('@vonage/server-sdk');
+const admin = require("firebase-admin")
 
 
 exports.sendEmail = (auth, subject, text, from, to) => {
@@ -106,7 +107,6 @@ exports.genRandomNums = (size) => {
     return token.toString();
 }
 
-
 //use of function 
 //const resp = sendSMS("0022379364385", "0022379364385", "message test for sms")
 exports.sendSMS = async (from, to, message) => {
@@ -122,4 +122,14 @@ exports.sendSMS = async (from, to, message) => {
 exports.convertOctetsToMo = (octets) => {
     const megaoctets = octets / (1024 * 1024)
     return megaoctets.toFixed(0) + ' Mo'
+}
+
+exports.sendNotification = async (title, body, imageUrl, to, data) => {
+    try {
+        const message = { notification: { title, body, imageUrl }, token: to, data }
+
+        return await admin.messaging().send(message)
+    } catch (error) {
+        return error
+    }
 }

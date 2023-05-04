@@ -4,8 +4,6 @@ const { isEmpty, genKey, sendSMS } = require("../utils/functions")
 const bcrypt = require('bcrypt')
 const { register_validation, register_error_validation } = require("../utils/validations")
 const { isValidObjectId } = require("mongoose")
-const { ParticipantListInstance } = require("twilio/lib/rest/conversations/v1/conversation/participant")
-
 
 //----------- @return boolean depending on whether the user token is valid or not ------------------
 //check if got token is valid then send true else send false
@@ -38,7 +36,6 @@ exports.profile = async (req, res) => {
     } catch (error) {
         res.status(500).send({ message: error })
     }
-
 }
 
 //----------- @return "logged user's data" and "token" ------------------
@@ -130,11 +127,11 @@ exports.register = (req, res) => {
 
     const { error, initialError } = register_validation(phone, password, password_confirm)
 
-    const user = new UserModel({ phone, password })
 
     if (error !== initialError) {
         return res.status(400).json({ message: error })
     } else {
+
         UserModel.find({ vip: true })
             .then(users => {
                 if (users.length !== 0) {
@@ -154,47 +151,58 @@ exports.register = (req, res) => {
                     licenceKey.get((error, code) => {
                         if (error) return res.status(500).json({ message: error.message })
 
-                        user.save()
-                            .then((user) => {
-                                user.licenseKey = code
-                                if (getAllNumbersPhoneInvited.includes(phone)) user.vip = true
+                        bcrypt.hash(password, 10)
+                            .then(hash => {
+                                const user = new UserModel({ phone, password: hash })
 
                                 user.save()
                                     .then((user) => {
+                                        user.licenseKey = code
+                                        if (getAllNumbersPhoneInvited.includes(phone)) user.vip = true
 
-                                        // l'envoie de la clé de la licence a l'utilisateur
-                                        sendSMS("0022379364385", "0022373030732", code)
-                                            .then(sms => {
-                                                res.status(201).json({ response: user, message: "L'utilisateur a été crée avec succès", sms })
+                                        user.save()
+                                            .then((user) => {
+
+                                                // l'envoie de la clé de la licence a l'utilisateur
+                                                sendSMS("0022379364385", "0022373030732", code)
+                                                    .then(sms => {
+                                                        res.status(201).json({ response: user, message: "L'utilisateur a été crée avec succès", sms })
+                                                    })
+                                                    .catch((error) => res.status(500).json({ message: error.message }))
                                             })
-                                            .catch((error) => res.status(500).json({ message: error.message }))
+                                            .catch((error) => res.status(500).json({ message: error }))
                                     })
-                                    .catch((error) => res.status(500).json({ message: error }))
+                                    .catch((error) => res.status(500).json(register_error_validation(error)))
                             })
-                            .catch((error) => res.status(500).json(register_error_validation(error)))
+                            .catch(error => res.status(500).json({ message: error }))
                     })
-
                 } else {
                     const licenceKey = genKey()
                     licenceKey.get((error, code) => {
                         if (error) return res.status(500).json({ message: error.message })
 
-                        user.save()
-                            .then((user) => {
-                                user.licenseKey = code
+                        bcrypt.hash(password, 10)
+                            .then(hash => {
+                                const user = new UserModel({ phone, password: hash })
 
                                 user.save()
                                     .then((user) => {
+                                        user.licenseKey = code
 
-                                        sendSMS("0022373030732", "0022373030732", code)
-                                            .then(sms => {
-                                                res.status(201).json({ response: user, message: "L'utilisateur a été crée avec succès", sms })
+                                        user.save()
+                                            .then((user) => {
+
+                                                sendSMS("0022373030732", "0022373030732", code)
+                                                    .then(sms => {
+                                                        res.status(201).json({ response: user, message: "L'utilisateur a été crée avec succès", sms })
+                                                    })
+                                                    .catch((error) => res.status(500).json({ message: error.message }))
                                             })
                                             .catch((error) => res.status(500).json({ message: error.message }))
                                     })
-                                    .catch((error) => res.status(500).json({ message: error.message }))
+                                    .catch((error) => res.status(500).json(register_error_validation(error)))
                             })
-                            .catch((error) => res.status(500).json(register_error_validation(error)))
+                            .catch(error => res.status(500).json({ message: error }))
                     })
                 }
             })
