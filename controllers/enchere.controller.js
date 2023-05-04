@@ -49,16 +49,15 @@ exports.get_all_encheres = async (req, res) => {
 exports.update_enchere = async (req, res) => {
     try {
         const { old_img, new_img } = req.body
-
         const enchere = await EnchereModel.findById(req.params.id)
         if (!enchere) throw "Aucune enchère correspondante n'a été trouvée."
 
         let medias = enchere.medias
 
-        if (old_img.length !== 0) {
-            medias.forEach(media => {
-                if (!old_img.includes(media)) {
-                    const typeFile = media.split("-")[0]
+        if (old_img && (!isEmpty(old_img) || old_img?.length !== 0)) {
+            medias?.forEach(media => {
+                if (!old_img?.includes(media)) {
+                    const typeFile = media?.split("-")[0]
                     let pathFilename = ""
 
                     if (typeFile === "image") {
@@ -73,13 +72,13 @@ exports.update_enchere = async (req, res) => {
                     })
                 }
             })
+
+            req.body.medias = new_img ? [...old_img, ...new_img] : [...old_img]
         }
 
-        req.body.medias = new_img ? [...old_img, ...new_img] : [...old_img]
 
         const enchere_after_update = await EnchereModel.findByIdAndUpdate(req.params.id, { ...req.body }, { new: true })
         if (!enchere_after_update) throw "Une erreur est survenue au niveau du serveur lors de la mise à de l'enchère."
-
         res.send({ response: enchere_after_update, message: "La mise à jour de l'enchère a été effectuée avec succès." })
     } catch (error) {
         res.status(500).send({ message: error })
@@ -91,13 +90,12 @@ exports.delete_enchere = async (req, res) => {
     try {
         if (!isValidObjectId(req.params.id)) return res.status(400).json({ message: "L'identifiant de l'enchère est invalide." })
 
-        const enchere = await EnchereModel.findByIdAndDelete(req.params.id)
+        const enchere = await EnchereModel.findById(req.params.id)
 
         if (enchere) {
-            const medias = enchere.medias
-
-            medias.forEach(media => {
-                const typeFile = media.split("-")[0]
+            const medias = enchere?.medias
+            medias?.forEach(media => {
+                const typeFile = media?.split("-")[0]
                 let pathFilename = ""
 
                 if (typeFile === "image") {
@@ -107,11 +105,13 @@ exports.delete_enchere = async (req, res) => {
                 }
 
                 fs.unlink(pathFilename, (error) => {
+                    console.log("error========= ", error)
                     if (error) throw error
                     console.log(`${media} a été supprimée`)
                 })
-            })
 
+                enchere.deleteOne()
+            })
             res.send({ response: enchere, message: "Suppression de l'enchère effectuée avec succès." })
         } else {
             return res.status(404).json({ message: "Désolé, aucune enchère correspondante n'a été trouvée." })
