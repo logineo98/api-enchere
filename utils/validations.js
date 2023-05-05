@@ -21,7 +21,7 @@ exports.login_validation = async (req, res, next) => {
 
         if ((dashboard === "" || !dashboard || isEmpty(dashboard)) && phone && !regex.phone.test(phone)) throw "Format du numéro incorrect."
         if (dashboard === "" && (isEmpty(phone) || phone === "")) throw "Numéro ou mot de passe incorrect."
-        if (isEmpty(password) || password === "") throw "Numéro ou mot de passe incorrect 2."
+        if (isEmpty(password) || password === "") throw "Numéro ou mot de passe incorrect."
         if ((!isEmpty(password) || password !== "") && password.length < 6) throw "Mot de passe trop court."
 
         next()

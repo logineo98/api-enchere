@@ -4,7 +4,7 @@ exports.regex = {
 }
 
 exports.constants = {
-    sms_sender_number: "22373030732"
+    sms_sender_number: "+22379364385"
 }
 
 exports.upload_files_constants = {

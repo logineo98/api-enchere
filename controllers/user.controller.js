@@ -1,10 +1,14 @@
 const { isValidObjectId } = require("mongoose")
 const UserModel = require("../models/user.model")
 const { send_invitation_validation } = require("../utils/validations")
-const { isEmpty, genRandomNums, sendSMS, isEqual } = require("../utils/functions")
+const { isEmpty, genRandomNums, sendSMS, isEqual, sendSMSTwilio } = require("../utils/functions")
 const bcrypt = require('bcrypt')
 const jwt = require("jsonwebtoken")
 const EnchereModel = require("../models/enchere.model")
+const TextFlow = require("textflow.js")
+const { constants } = require("../utils/constants")
+
+TextFlow.useKey(process.env.OTP_API)
 
 //--------- @return "user's data" and "success message" ----------------
 //update user's info and password if exist
@@ -87,7 +91,8 @@ exports.send_invitation = (req, res) => {
                         .then(() => {
                             UserModel.findByIdAndUpdate(req.params.id, { $addToSet: { invitations: friend_phone } }, { new: true })
                                 .then(user => {
-                                    sendSMS("0022379364385", "0022379364385", "Lien de Play Store")
+                                    // sendSMS(constants.sms_sender_number, "+223" + user?.phone, "Lien de Play Store")
+                                    sendSMSTwilio("+223" + user.phone, "Lien de Play Store")
                                         .then(sms => {
                                             res.send({ response: user, message: "L'invitation a bien été envoyé !", sms })
                                         })
@@ -100,7 +105,7 @@ exports.send_invitation = (req, res) => {
                     // sinon l'expediteur conservera juste le numero d'invitation dans sa liste d'invitation
                     UserModel.findByIdAndUpdate(req.params.id, { $addToSet: { invitations: friend_phone } }, { new: true })
                         .then(user => {
-                            sendSMS("0022379364385", "0022379364385", "Lien de Play Store")
+                            sendSMSTwilio("+223" + user.phone, "Lien de Play Store")
                                 .then(sms => {
                                     res.send({ response: user, message: "L'invitation a bien été envoyé !", sms })
                                 })
@@ -116,6 +121,10 @@ exports.send_invitation = (req, res) => {
 exports.forgot_password = async (req, res) => {
     try {
         const { plateforme, phone } = req.body
+
+        // let rs = await TextFlow.sendVerificationSMS('+223' + phone)
+        // console.log(rs)
+
 
         if (phone === "" || isEmpty(phone)) throw "Un numéro de téléphone est requis!"
 
@@ -136,12 +145,15 @@ exports.forgot_password = async (req, res) => {
 
 
             let message = `Votre code de recuperation est: ${token}`
-            const sms = await sendSMS("0022373030732", "0022373030732", message)
+            // const sms = await sendSMS("0022379364385", "0022379364385", message)
+            const sms = await sendSMSTwilio("+223" + phone, message)
+
             if (isEmpty(sms)) throw "Erreur d'envoie du code de recuperation"
 
             res.status(200).json({ response: { token, phone }, message: "Code de recuperation envoyé" })
         }
     } catch (error) {
+        console.log(error)
         res.status(500).send({ message: error })
     }
 
@@ -153,6 +165,7 @@ exports.forgot_password = async (req, res) => {
 exports.confirm_forgot_recovery_code = async (req, res) => {
     try {
         const { code, phone } = req.body
+
 
         if (isEmpty(code) || code === "") throw "Le code de récupération est requis."
 

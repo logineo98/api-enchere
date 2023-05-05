@@ -1,9 +1,10 @@
 const JsonWebToken = require("jsonwebtoken")
 const UserModel = require("../models/user.model")
-const { isEmpty, genKey, sendSMS } = require("../utils/functions")
+const { isEmpty, genKey, sendSMS, sendSMSTwilio } = require("../utils/functions")
 const bcrypt = require('bcrypt')
 const { register_validation, register_error_validation } = require("../utils/validations")
 const { isValidObjectId } = require("mongoose")
+const { constants } = require("../utils/constants")
 
 //----------- @return boolean depending on whether the user token is valid or not ------------------
 //check if got token is valid then send true else send false
@@ -45,21 +46,6 @@ exports.profile = async (req, res) => {
 //by default his token expire in 3 hours
 exports.login = async (req, res) => {
     try {
-        console.log(req.body)
-        // const { phone } = req.body
-
-        // //find user by phone number
-        // const user = await UserModel.findOne({ phone })
-
-        // //if user doesn't exist
-        // if (isEmpty(user)) throw "Numéro de téléphone ou mot de passe incorrect."
-
-        // //check if password is right
-        // const passwordMatched = bcrypt.compare(req.body.password, user.password)
-        // if (!passwordMatched)
-        //     throw `Numéro de téléphone ou mot de passe est incorrect.`
-
-
         var { email, phone, dashboard } = req.body;
         if (email) email = req.body.email.toLowerCase().trim();
         if (phone) phone = req.body.phone.trim();
@@ -74,7 +60,7 @@ exports.login = async (req, res) => {
         if (isEmpty(user) || user === null) throw `${msg} ou le mot de passe est incorrect. `;
 
 
-        const pass = bcrypt.compare(req.body.password, user.password);
+        const pass = await bcrypt.compare(req.body.password, user.password);
         if (!pass) throw `${msg} ou le mot de passe est incorrect.`;
 
         // Create token JWT who expired in 3hours
@@ -90,8 +76,6 @@ exports.login = async (req, res) => {
     }
 
 }
-
-
 
 
 //----------- @return "logged user's data" ------------------
@@ -164,7 +148,8 @@ exports.register = (req, res) => {
                                             .then((user) => {
 
                                                 // l'envoie de la clé de la licence a l'utilisateur
-                                                sendSMS("0022379364385", "0022373030732", code)
+                                                // sendSMS(constants.sms_sender_number, "00223" + user?.phone, code)
+                                                sendSMSTwilio("+223" + user.phone, code)
                                                     .then(sms => {
                                                         res.status(201).json({ response: user, message: "L'utilisateur a été crée avec succès", sms })
                                                     })
@@ -192,7 +177,8 @@ exports.register = (req, res) => {
                                         user.save()
                                             .then((user) => {
 
-                                                sendSMS("0022373030732", "0022373030732", code)
+                                                // sendSMS(constants.sms_sender_number, "00223" + user?.phone, code)
+                                                sendSMSTwilio("+223" + user.phone, code)
                                                     .then(sms => {
                                                         res.status(201).json({ response: user, message: "L'utilisateur a été crée avec succès", sms })
                                                     })

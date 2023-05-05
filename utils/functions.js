@@ -2,8 +2,8 @@ const licenseKey = require("license-key-gen");
 const nodemailer = require("nodemailer");
 const Generator = require("license-key-generator");
 const { Vonage } = require('@vonage/server-sdk');
-const admin = require("firebase-admin")
-
+const admin = require("firebase-admin");
+const twilio = require('twilio');
 
 exports.sendEmail = (auth, subject, text, from, to) => {
     const transporter = nodemailer.createTransport({
@@ -116,6 +116,22 @@ exports.sendSMS = async (from, to, message) => {
         return ans;
     } catch (error) {
         return error;
+    }
+}
+
+// Function to send SMS using Twilio
+exports.sendSMSTwilio = async (toNumber, message) => {
+    const accountSid = 'AC517c6b441a2e73f9578da69db46d3204';
+    const authToken = '0af298b80ef5659945acb603e7b97dd2';
+    const fromNumber = '+13203011002';
+
+    const client = twilio(accountSid, authToken);
+
+    try {
+        const response = await client.messages.create({ body: message, from: fromNumber, to: toNumber });
+        return response
+    } catch (error) {
+        console.error(`Error sending SMS: ${error.message}`);
     }
 }
 
