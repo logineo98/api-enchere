@@ -236,6 +236,34 @@ exports.search_result = async (req, res) => {
 
 }
 
+exports.filter_by_category = async (req, res) => {
+
+    try {
+        const encheres = await EnchereModel.find().sort({ createdAt: -1 })
+
+        if (!isEmpty(encheres)) {
+            let filter_by_category_result = []
+
+            for (const enchere of encheres) {
+                const { category } = req.body
+
+                if (enchere.categories.includes(category)) {
+                    const enchere_verify = filter_by_category_result.find(ench => ench._id == enchere._id)
+
+                    if (enchere_verify === undefined) filter_by_category_result.push(enchere)
+                }
+            }
+
+            res.send({ response: filter_by_category_result })
+        } else {
+            res.send({ message: "Aucune enchère n'existe." })
+        }
+    } catch (error) {
+        res.status(500).send({ message: error })
+    }
+
+}
+
 exports.like_enchere = async (req, res) => {
     try {
         const { user_id } = req.body
