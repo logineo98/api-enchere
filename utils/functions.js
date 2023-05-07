@@ -149,3 +149,27 @@ exports.sendNotification = async (title, body, imageUrl, to, data) => {
         return error
     }
 }
+
+
+
+exports.removePhoneIndicatif = (numero) => {
+    var indicatif1 = "+223";
+    var indicatif2 = "00223";
+    if (numero.startsWith(indicatif1)) {
+        return numero.slice(indicatif1.length);
+    } else if (numero.startsWith(indicatif2))
+        return numero.slice(indicatif2.length);
+    else {
+        return numero;
+    }
+}
+
+
+exports.addPhoneIndicatif = (numero) => {
+    var indicatif1 = "+223";
+    var indicatif2 = "00223";
+    if (!numero.startsWith(indicatif1) || !numero.startsWith(indicatif2))
+        return indicatif1 + numero;
+    else
+        return numero;
+}
