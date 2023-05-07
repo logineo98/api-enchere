@@ -36,7 +36,7 @@ exports.get_enchere = async (req, res) => {
 //-------------@return all articles -----------------------------
 exports.get_all_encheres = async (req, res) => {
     try {
-        const encheres = await EnchereModel.find().sort({ createdAt: -1 }).populate("sellerID")
+        const encheres = await EnchereModel.find().sort({ createdAt: -1 })
         if (!encheres) throw "Une erreur est survenue au niveau du serveur lors de la recuperation des enchères."
         res.send({ response: encheres })
     } catch (error) {
