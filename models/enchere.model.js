@@ -18,11 +18,12 @@ const enchere_sch = new mongoose.Schema({
     history: [{
         buyerID: { type: mongoose.Types.ObjectId, ref: "User", required: true },
         montant: { type: Number, required: true },
-        reserve_price: { type: Boolean, default: false },
+        reserve_price: { type: Boolean },
         date: { type: Number, default: new Date().getTime() }
     }],
     likes: [{ type: mongoose.Types.ObjectId, ref: "User", required: true }],
     trash: { type: Boolean, default: false }
 }, { timestamps: true })
+
 const EnchereModel = mongoose.model("Enchere", enchere_sch)
 module.exports = EnchereModel

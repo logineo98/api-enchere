@@ -17,6 +17,12 @@ const user_sch = new mongoose.Schema({
     trash: { type: Boolean, default: false },
     notification_token: { type: String },
     rejected: { type: Boolean, default: false },
+    tmp: {
+        enchereID: { type: mongoose.Types.ObjectId, ref: "Enchere", required: true },
+        montant: { type: Number, required: true },
+        reserve_price: { type: Boolean, default: false },
+        date: { type: Number, default: new Date().getTime() }
+    },
     admin: { type: Boolean, default: false }
 }, { timestamps: true })
 
