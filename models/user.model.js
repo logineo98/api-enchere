@@ -20,8 +20,8 @@ const user_sch = new mongoose.Schema({
     tmp: {
         enchereID: { type: mongoose.Types.ObjectId, ref: "Enchere" },
         montant: { type: Number },
-        reserve_price: { type: Boolean, default: false },
-        date: { type: Number, default: new Date().getTime() }
+        reserve_price: { type: Boolean },
+        date: { type: Number }
     },
     admin: { type: Boolean, default: false }
 }, { timestamps: true })
