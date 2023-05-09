@@ -32,7 +32,7 @@ exports.vitepay_callback = async (req, res) => {
                 if (success && success == 1) {
                     if (sandbox && (sandbox == 1 || sandbox == 0)) {
                         if (user?.tmp?.reserve_price && user?.tmp?.reserve_price === true) {
-                            enchere.history.push({ buyerID, reserve_price: true, montant: enchere.reserve_price, date: new Date().getTime() })
+                            enchere.history.push({ buyerID, reserve_price: true, real_montant: enchere.reserve_price, montant: enchere.reserve_price, date: new Date().getTime() })
                             enchere.enchere_status = "closed"
 
                             const enchere_after_participation = await enchere.save()
@@ -49,7 +49,7 @@ exports.vitepay_callback = async (req, res) => {
                                 // recuperation du dernier encherisseur
                                 const get_last_encherisseur = enchere.history[enchere.history.length - 1]
 
-                                enchere.history.push({ buyerID, montant: get_last_encherisseur.montant + user?.tmp?.montant, date: new Date().getTime() })
+                                enchere.history.push({ buyerID, real_montant: user?.tmp?.montant, montant: get_last_encherisseur.montant + user?.tmp?.montant, date: new Date().getTime() })
 
                                 const enchere_after_participation = await enchere.save()
                                 if (!enchere_after_participation) return res.status(500).json({ status: 0, message: "Une erreur est survenue au niveau du serveur lors de la participation à l'enchère." })
@@ -60,7 +60,7 @@ exports.vitepay_callback = async (req, res) => {
 
                                 res.send({ status: 1 })
                             } else {
-                                enchere.history.push({ buyerID, montant: enchere.started_price + user?.tmp?.montant, date: new Date().getTime() })
+                                enchere.history.push({ buyerID, real_montant: user?.tmp?.montant, montant: enchere.started_price + user?.tmp?.montant, date: new Date().getTime() })
 
                                 const enchere_after_participation = await enchere.save()
                                 if (!enchere_after_participation) return res.status(500).json({ status: 0, message: "Une erreur est survenue au niveau du serveur lors de la participation à l'enchère." })

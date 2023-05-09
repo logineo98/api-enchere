@@ -18,6 +18,7 @@ const enchere_sch = new mongoose.Schema({
     history: [{
         buyerID: { type: mongoose.Types.ObjectId, ref: "User", required: true },
         montant: { type: Number, required: true },
+        real_montant: { type: Number, required: true },
         reserve_price: { type: Boolean, default: false },
         date: { type: Number, default: new Date().getTime() }
     }],
