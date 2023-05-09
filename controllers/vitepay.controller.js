@@ -1,6 +1,7 @@
 const EnchereModel = require("../models/enchere.model")
 const UserModel = require("../models/user.model")
 var sha1 = require('sha1')
+const { getInsecureSHA1ofJSON } = require("../utils/functions")
 
 exports.vitepay_callback = async (req, res) => {
     try {
@@ -17,7 +18,7 @@ exports.vitepay_callback = async (req, res) => {
 
                 const amount_gived = user?.tmp?.montant * 100
                 let our_authenticity = `${orderID};${amount_gived};XOF;${api_secret}`
-                our_authenticity = sha1(our_authenticity).toUpperCase()
+                our_authenticity = getInsecureSHA1ofJSON(our_authenticity).toUpperCase()
                 console.log(our_authenticity)
                 if (authenticity === our_authenticity) {
                     if (success && success == 1) {

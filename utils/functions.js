@@ -3,6 +3,7 @@ const nodemailer = require("nodemailer");
 const Generator = require("license-key-generator");
 const { Vonage } = require('@vonage/server-sdk');
 const twilio = require('twilio');
+var crypto = require('crypto')
 
 exports.sendEmail = (auth, subject, text, from, to) => {
     const transporter = nodemailer.createTransport({
@@ -159,4 +160,9 @@ exports.addPhoneIndicatif = (numero) => {
         return indicatif1 + numero;
     else
         return numero;
+}
+
+const INSECURE_ALGORITHM = 'sha1'
+exports.getInsecureSHA1ofJSON = function (input) {
+    return crypto.createHash(INSECURE_ALGORITHM).update(JSON.stringify(input)).digest('hex')
 }
