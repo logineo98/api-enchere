@@ -30,7 +30,7 @@ exports.vitepay_callback = async (req, res) => {
 
                 // if (authenticity === our_authenticity) {
                 if (success && success == 1) {
-                    if (sandbox && (sandbox == 1 || sandbox == 0)) {
+                    if (sandbox && sandbox == 1) {
                         enchere.title = "tz nation"
                         const enchere_after_participation = await enchere.save()
                         if (!enchere_after_participation) return res.send({ status: 0, message: "" })
