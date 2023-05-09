@@ -1,6 +1,5 @@
 const EnchereModel = require("../models/enchere.model")
 const UserModel = require("../models/user.model")
-var sha1 = require('sha1')
 const { getInsecureSHA1ofJSON } = require("../utils/functions")
 
 exports.vitepay_callback = async (req, res) => {
@@ -75,10 +74,11 @@ exports.vitepay_callback = async (req, res) => {
                         }
                     }
                 } else if (failure && failure == 1) {
-                    const enchere_updated = await EnchereModel.findByIdAndUpdate(user.tmp.enchereID, { title: "kougnon" }, { new: true })
-                    if (!enchere_updated) throw "Une erreur est survenue lors de la mise a jour de l'enchère!"
+                    user.tmp = null
+                    const user_after_participate_encher = await user.save()
+                    if (!user_after_participate_encher) return res.status(500).json({ status: 0, message: "Une erreur est survenue au niveau du serveur lors de la reinitialisation de la variable tmp dans user" })
 
-                    res.send({ status: 0, message: "Raison inconnu pour le moment" })
+                    res.send({ status: 0, message: "Une erreur de failure=1 retournée par vitepay" })
                 }
                 // } else return res.send({ status: 0, message: "Les deux authenticity ne correspondent pas" })
             } else return res.send({ status: 0, message: "order_id non reçu" })
