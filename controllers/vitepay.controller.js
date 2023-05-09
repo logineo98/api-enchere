@@ -45,4 +45,3 @@ exports.vitepay_callback = async (req, res) => {
         res.status(500).send({ message: error })
     }
 }
-
