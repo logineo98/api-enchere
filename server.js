@@ -7,7 +7,6 @@ const { upload_files_constants } = require("./utils/constants")
 const { convertOctetsToMo } = require("./utils/functions")
 const admin = require("firebase-admin")
 const serviceAccount = require("./serviceAccountKey.json")
-const EnchereModel = require("./models/enchere.model")
 require("./config/db")
 
 const app = express()
@@ -26,32 +25,7 @@ app.use(cors())
 app.use("/api/user", require("./routes/user.route"))
 app.use("/api/enchere", require("./routes/enchere.route"))
 app.use("/api/notification", require("./routes/notification.route"))
-
-app.post("/api/callback", async (req, res) => {
-
-    try {
-        const { authenticity, order_id, sandbox, success, failure } = req.body
-
-        if (order_id && authenticity) {
-            if (success && success == 1) {
-                const enchere_updated = await EnchereModel.findByIdAndUpdate(order_id, { title: "tz" }, { new: true })
-                if (!enchere_updated) throw "Une erreur est survenue lors de la mise a jour de l'enchère!"
-
-                res.send({ status: "1" })
-            }
-        }
-        // else {
-        //     const enchere_updated = await EnchereModel.findByIdAndUpdate(order_id, { title: "dolo" }, { new: true })
-        //     if (!enchere_updated) throw "Une erreur est survenue lors de la mise a jour de l'enchère!"
-
-        //     res.send({ status: "0", message: "Raison inconnue pour le moment" })
-        // }
-
-    } catch (error) {
-        res.status(500).send({ message: error })
-    }
-    // res.status(200).send({ body })
-})
+app.use("/api/vitepay", require("./routes/vitepay.route"))
 
 //upload files error handler
 app.use((err, req, res, next) => {
