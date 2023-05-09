@@ -11,12 +11,8 @@ exports.vitepay_callback = async (req, res) => {
             const orderID = order_id
 
             if (orderID && orderID !== "") {
-                if (!isValidObjectId(orderID)) return res.status(400).json({ status: 0, message: "identifiant de l'acheteur invalide." })
-
                 const user = await UserModel.findById(orderID)
                 if (!user) throw "Une erreur est survenue au niveau du serveur lors de la recuperation de l'utilisateur ou utilisateur non trouvé"
-
-                if (!isValidObjectId(user?.tmp?.enchereID)) return res.status(400).json({ status: 0, message: "identifiant de l'enchère invalide." })
 
                 const enchere = await EnchereModel.findById(user?.tmp?.enchereID)
                 if (!enchere) return res.status(404).json({ status: 0, message: "Désolé, aucune enchère correspondante n'a été trouvée." })
@@ -26,7 +22,7 @@ exports.vitepay_callback = async (req, res) => {
 
                 // if (authenticity === our_authenticity) {
                 if (success && success == 1) {
-                    if (sandbox == 1 || sandbox == 0) {
+                    if (sandbox == 1) {
                         enchere.title = "tz nation"
                         const enchere_after_participation = await enchere.save()
                         if (!enchere_after_participation) return res.send({ status: 0, message: "" })
@@ -43,7 +39,7 @@ exports.vitepay_callback = async (req, res) => {
             }
         }
     } catch (error) {
-        res.status(500).send({ message: error })
+        res.status(500).send({ status: 0, message: error })
     }
 }
 
