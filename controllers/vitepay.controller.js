@@ -18,7 +18,7 @@ exports.vitepay_callback = async (req, res) => {
                 const amount_gived = user?.tmp?.montant * 100
                 let our_authenticity = `${orderID};${amount_gived};XOF;${api_secret}`
                 our_authenticity = sha1(our_authenticity).toUpperCase()
-
+                console.log(our_authenticity)
                 if (authenticity === our_authenticity) {
                     if (success && success == 1) {
                         if (sandbox == 1) {
@@ -38,9 +38,9 @@ exports.vitepay_callback = async (req, res) => {
 
                         res.send({ status: 0, message: "Raison inconnu pour le moment" })
                     }
-                }
-            }
-        }
+                } else return res.send({ status: 0, message: "Les deux authenticity ne correspondent pas" })
+            } else return res.send({ status: 0, message: "order_id non reçu" })
+        } else return res.send({ status: 0, message: "order_id ou authenticity non reçu" })
     } catch (error) {
         res.status(500).send({ message: error })
     }
