@@ -11,19 +11,27 @@ exports.vitepay_callback = async (req, res) => {
             const orderID = order_id
 
             if (orderID && orderID !== "") {
+                if (!isValidObjectId(orderID)) return res.status(400).json({ status: 0, message: "identifiant de l'acheteur invalide." })
+
                 const user = await UserModel.findById(orderID)
                 if (!user) throw "Une erreur est survenue au niveau du serveur lors de la recuperation de l'utilisateur ou utilisateur non trouvé"
 
-                const amount_gived = user?.tmp?.montant * 100
-                let our_authenticity = `${orderID};${amount_gived};XOF;${api_secret}`.toUpperCase();
+                if (!isValidObjectId(user.tmp.enchereID)) return res.status(400).json({ status: 0, message: "identifiant de l'enchère invalide." })
+
+                const enchere = await EnchereModel.findById(user.tmp.enchereID)
+                if (!enchere) return res.status(404).json({ status: 0, message: "Désolé, aucune enchère correspondante n'a été trouvée." })
+
+                // const amount_gived = user?.tmp?.montant * 100
+                // let our_authenticity = `${orderID};${amount_gived};XOF;${api_secret}`.toUpperCase();
 
                 // if (authenticity === our_authenticity) {
                 if (success && success == 1) {
                     if (sandbox == 1 || sandbox == 0) {
-                        const enchere_updated = await EnchereModel.findByIdAndUpdate(user.tmp.enchereID, { title: "tz" }, { new: true })
-                        if (!enchere_updated) throw "Une erreur est survenue lors de la mise a jour de l'enchère!"
+                        enchere.title = "tz nation"
+                        const enchere_after_participation = await enchere.save()
+                        if (!enchere_after_participation) return res.send({ status: 0, message: "" })
 
-                        res.send({ status: "1" })
+                        res.send({ status: 1 })
                     }
                 } else if (failure && failure == 1) {
                     const enchere_updated = await EnchereModel.findByIdAndUpdate(user.tmp.enchereID, { title: "kougnon" }, { new: true })
