@@ -19,26 +19,26 @@ exports.vitepay_callback = async (req, res) => {
                 let our_authenticity = `${orderID};${amount_gived};XOF;${api_secret}`.toUpperCase();
                 our_authenticity = sha1(our_authenticity)
 
-                // if (authenticity === our_authenticity) {
-                if (success && success == 1) {
-                    if (sandbox == 1) {
-                        const enchere_updated = await EnchereModel.findByIdAndUpdate(user.tmp.enchereID, { title: "tz" }, { new: true })
+                if (authenticity === our_authenticity) {
+                    if (success && success == 1) {
+                        if (sandbox == 1) {
+                            const enchere_updated = await EnchereModel.findByIdAndUpdate(user.tmp.enchereID, { title: "tz" }, { new: true })
+                            if (!enchere_updated) throw "Une erreur est survenue lors de la mise a jour de l'enchère!"
+
+                            res.send({ status: "1" })
+                        } else {
+                            const enchere_updated = await EnchereModel.findByIdAndUpdate(user.tmp.enchereID, { title: "tz" }, { new: true })
+                            if (!enchere_updated) throw "Une erreur est survenue lors de la mise a jour de l'enchère!"
+
+                            res.send({ status: "1" });
+                        }
+                    } else if (failure && failure == 1) {
+                        const enchere_updated = await EnchereModel.findByIdAndUpdate(user.tmp.enchereID, { title: "kougnon" }, { new: true })
                         if (!enchere_updated) throw "Une erreur est survenue lors de la mise a jour de l'enchère!"
 
-                        res.send({ status: "1" })
-                    } else {
-                        const enchere_updated = await EnchereModel.findByIdAndUpdate(user.tmp.enchereID, { title: "tz" }, { new: true })
-                        if (!enchere_updated) throw "Une erreur est survenue lors de la mise a jour de l'enchère!"
-
-                        res.send({ status: "1" });
+                        res.send({ status: 0, message: "Raison inconnu pour le moment" })
                     }
-                } else if (failure && failure == 1) {
-                    const enchere_updated = await EnchereModel.findByIdAndUpdate(user.tmp.enchereID, { title: "kougnon" }, { new: true })
-                    if (!enchere_updated) throw "Une erreur est survenue lors de la mise a jour de l'enchère!"
-
-                    res.send({ status: 0, message: "Raison inconnu pour le moment" })
                 }
-                // }
             }
         }
     } catch (error) {
