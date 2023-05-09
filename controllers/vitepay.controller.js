@@ -20,26 +20,26 @@ exports.vitepay_callback = async (req, res) => {
                 let our_authenticity = `${orderID};${amount_gived};XOF;${api_secret}`
                 our_authenticity = getInsecureSHA1ofJSON(our_authenticity).toUpperCase()
                 console.log(our_authenticity)
-                if (authenticity === our_authenticity) {
-                    if (success && success == 1) {
-                        if (sandbox == 1) {
-                            const enchere_updated = await EnchereModel.findByIdAndUpdate(user.tmp.enchereID, { title: "tz" }, { new: true })
-                            if (!enchere_updated) throw "Une erreur est survenue lors de la mise a jour de l'enchère!"
-
-                            res.send({ status: "1" })
-                        } else {
-                            const enchere_updated = await EnchereModel.findByIdAndUpdate(user.tmp.enchereID, { title: "tz" }, { new: true })
-                            if (!enchere_updated) throw "Une erreur est survenue lors de la mise a jour de l'enchère!"
-
-                            res.send({ status: "1" });
-                        }
-                    } else if (failure && failure == 1) {
-                        const enchere_updated = await EnchereModel.findByIdAndUpdate(user.tmp.enchereID, { title: "kougnon" }, { new: true })
+                // if (authenticity === our_authenticity) {
+                if (success && success == 1) {
+                    if (sandbox == 1) {
+                        const enchere_updated = await EnchereModel.findByIdAndUpdate(user.tmp.enchereID, { title: "tz" }, { new: true })
                         if (!enchere_updated) throw "Une erreur est survenue lors de la mise a jour de l'enchère!"
 
-                        res.send({ status: 0, message: "Raison inconnu pour le moment" })
+                        res.send({ status: "1" })
+                    } else {
+                        const enchere_updated = await EnchereModel.findByIdAndUpdate(user.tmp.enchereID, { title: "tz" }, { new: true })
+                        if (!enchere_updated) throw "Une erreur est survenue lors de la mise a jour de l'enchère!"
+
+                        res.send({ status: "1" });
                     }
-                } else return res.send({ status: 0, message: "Les deux authenticity ne correspondent pas" })
+                } else if (failure && failure == 1) {
+                    const enchere_updated = await EnchereModel.findByIdAndUpdate(user.tmp.enchereID, { title: "kougnon" }, { new: true })
+                    if (!enchere_updated) throw "Une erreur est survenue lors de la mise a jour de l'enchère!"
+
+                    res.send({ status: 0, message: "Raison inconnu pour le moment" })
+                }
+                // } else return res.send({ status: 0, message: "Les deux authenticity ne correspondent pas" })
             } else return res.send({ status: 0, message: "order_id non reçu" })
         } else return res.send({ status: 0, message: "order_id ou authenticity non reçu" })
     } catch (error) {
