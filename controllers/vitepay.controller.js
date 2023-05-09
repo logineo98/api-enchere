@@ -34,11 +34,11 @@ exports.vitepay_callback = async (req, res) => {
                             enchere.enchere_status = "closed"
 
                             const enchere_after_participation = await enchere.save()
-                            if (!enchere_after_participation) return res.status(500).json({ status: 0, message: "Une erreur est survenue au niveau du serveur lors de la participation à l'enchère." })
+                            if (!enchere_after_participation) throw "Une erreur est survenue au niveau du serveur lors de la participation à l'enchère."
 
                             user.tmp = null
                             const user_after_participate_encher = await user.save()
-                            if (!user_after_participate_encher) return res.status(500).json({ status: 0, message: "Une erreur est survenue au niveau du serveur lors de la reinitialisation de la variable tmp dans user" })
+                            if (!user_after_participate_encher) throw "Une erreur est survenue au niveau du serveur lors de la reinitialisation de la variable tmp dans user"
 
                             res.send({ status: 1 })
                         } else {
@@ -50,22 +50,22 @@ exports.vitepay_callback = async (req, res) => {
                                 enchere.history.push({ buyerID, real_montant: user?.tmp?.montant, montant: get_last_encherisseur.montant + user?.tmp?.montant, date: new Date().getTime() })
 
                                 const enchere_after_participation = await enchere.save()
-                                if (!enchere_after_participation) return res.status(500).json({ status: 0, message: "Une erreur est survenue au niveau du serveur lors de la participation à l'enchère." })
+                                if (!enchere_after_participation) throw "Une erreur est survenue au niveau du serveur lors de la participation à l'enchère."
 
                                 user.tmp = null
                                 const user_after_participate_encher = await user.save()
-                                if (!user_after_participate_encher) return res.status(500).json({ status: 0, message: "Une erreur est survenue au niveau du serveur lors de la reinitialisation de la variable tmp dans user" })
+                                if (!user_after_participate_encher) throw "Une erreur est survenue au niveau du serveur lors de la reinitialisation de la variable tmp dans user"
 
                                 res.send({ status: 1 })
                             } else {
                                 enchere.history.push({ buyerID, real_montant: user?.tmp?.montant, montant: enchere.started_price + user?.tmp?.montant, date: new Date().getTime() })
 
                                 const enchere_after_participation = await enchere.save()
-                                if (!enchere_after_participation) return res.status(500).json({ status: 0, message: "Une erreur est survenue au niveau du serveur lors de la participation à l'enchère." })
+                                if (!enchere_after_participation) throw "Une erreur est survenue au niveau du serveur lors de la participation à l'enchère."
 
                                 user.tmp = null
                                 const user_after_participate_encher = await user.save()
-                                if (!user_after_participate_encher) return res.status(500).json({ status: 0, message: "Une erreur est survenue au niveau du serveur lors de la reinitialisation de la variable tmp dans user" })
+                                if (!user_after_participate_encher) throw "Une erreur est survenue au niveau du serveur lors de la reinitialisation de la variable tmp dans user"
 
                                 res.send({ status: 1 })
                             }
@@ -81,7 +81,7 @@ exports.vitepay_callback = async (req, res) => {
             }
         }
     } catch (error) {
-        res.status(500).send({ status: 0, message: error })
+        res.send({ status: 0, message: error })
     }
 }
 
