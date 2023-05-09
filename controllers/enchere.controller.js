@@ -164,7 +164,6 @@ exports.participate_in_enchere = async (req, res) => {
     } catch (error) {
         res.status(500).send({ message: error.message })
     }
-
 }
 
 exports.search_result = async (req, res) => {
