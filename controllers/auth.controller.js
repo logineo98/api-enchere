@@ -5,6 +5,8 @@ const bcrypt = require('bcrypt')
 const { isValidObjectId } = require("mongoose")
 const { constants, regex } = require("../utils/constants")
 const { removePhoneIndicatif } = require("../utils/functions")
+const { default: axios } = require("axios")
+const { send_notif_func } = require("./notification.controller")
 
 //----------- @return boolean depending on whether the user token is valid or not ------------------
 //check if got token is valid then send true else send false
@@ -68,8 +70,15 @@ exports.login = async (req, res) => {
 
         let { password, ...rest } = user._doc
 
+        let title = "Authentification";
+        let body = "Authentification reussie!"
+        let to = user?.notification_token
+        let data = { type: "success" }
+
+        const notif = await send_notif_func(title, body, "", to, data)
+
         // Retour de la réponse avec le token et l'employé connecté
-        res.status(200).json({ token, response: rest, message: rest.license_status ? "Vous êtes connecté." : !rest.license_status && "Activer votre compte." })
+        res.status(200).json({ token, response: rest, notif, message: rest.license_status ? "Vous êtes connecté." : !rest.license_status && "Activer votre compte." })
 
     } catch (error) {
         res.status(500).send({ message: error })
@@ -135,6 +144,7 @@ exports.signup = async (req, res) => {
         }
 
         if (!isEmpty(facebook) || facebook !== null) toStore.facebook = facebook
+        if (!isEmpty(req.body.notification_token) || req.body.notification_token !== "") toStore.notification_token = req.body.notification_token
 
         if (dashboard && dashboard !== "") {
             if (req.body.email) toStore.email = req.body.email?.toLowerCase()?.trim()
@@ -146,10 +156,17 @@ exports.signup = async (req, res) => {
         }
 
         const user = await toStore.save()
+
+        let title = "Creation de compte";
+        let body = "Votre compte à été crée avec succès."
+        let to = user?.notification_token
+
+        const notif = await send_notif_func(title, body, "", to, null)
+
         const token = JsonWebToken.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "3h" })
         let { password, ...rest } = user._doc
 
-        res.status(200).json({ token, response: rest, message: "Creation de compte reussie." })
+        res.status(200).json({ token, response: rest, notif, message: "Creation de compte reussie." })
     } catch (error) {
         console.log(error)
         res.status(500).send({ message: error });

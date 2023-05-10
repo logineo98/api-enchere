@@ -3,7 +3,6 @@ const nodemailer = require("nodemailer");
 const Generator = require("license-key-generator");
 const { Vonage } = require('@vonage/server-sdk');
 const twilio = require('twilio');
-var crypto = require('crypto')
 
 exports.sendEmail = (auth, subject, text, from, to) => {
     const transporter = nodemailer.createTransport({
@@ -122,7 +121,7 @@ exports.sendSMS = async (from, to, message) => {
 // Function to send SMS using Twilio
 exports.sendSMSTwilio = async (toNumber, message) => {
     const accountSid = 'AC517c6b441a2e73f9578da69db46d3204';
-    const authToken = '0cafbb46ec16500e3be994b79d54ada2';
+    const authToken = 'aa0d2f94e2e076888ba27ee3dd04183f';
     const fromNumber = '+13203011002';
 
     const client = twilio(accountSid, authToken);
@@ -160,9 +159,4 @@ exports.addPhoneIndicatif = (numero) => {
         return indicatif1 + numero;
     else
         return numero;
-}
-
-const INSECURE_ALGORITHM = 'sha1'
-exports.getInsecureSHA1ofJSON = function (input) {
-    return crypto.createHash(INSECURE_ALGORITHM).update(JSON.stringify(input)).digest('hex')
 }

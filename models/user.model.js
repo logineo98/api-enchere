@@ -9,7 +9,6 @@ const user_sch = new mongoose.Schema({
     image: { type: String },
     password: { type: String, trim: true, required: true, minlength: 6 },
     facebook: { id: String, first_name: String, last_name: String, picture_url: String },
-    confirm_facebook_later: { type: Boolean, default: false },
     vip: { type: Boolean, default: false },
     invitations: [String],
     forgot_password_token: { type: String },
@@ -25,12 +24,7 @@ const user_sch = new mongoose.Schema({
     admin: { type: Boolean, default: false }
 }, { timestamps: true })
 
-// // play function before save into display: 'block',
-// user_sch.pre("save", async function (next) {
-//     const salt = await bcrypt.genSalt()
-//     this.password = await bcrypt.hash(this.password, salt)
-//     next()
-// })
+
 
 const UserModel = mongoose.model("User", user_sch)
 

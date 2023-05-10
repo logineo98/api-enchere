@@ -10,3 +10,22 @@ exports.send_notification = (req, res) => {
         .then(resp => res.send({ response: resp }))
         .catch(error => res.status(500).json({ message: error }))
 }
+
+
+exports.send_notif_func = async (title, body, imageUrl, to, data) => {
+
+    let message = null
+    if (imageUrl === "")
+        message = { notification: { title, body }, token: to, data: data ? data : {} }
+    else
+        if (data === null)
+            message = { notification: { title, body, imageUrl }, token: to }
+        else
+            if (imageUrl === "" && data === null)
+                message = { notification: { title, body }, token: to }
+            else
+                message = { notification: { title, body, imageUrl }, token: to, data }
+
+    const notif = await admin.messaging().send(message)
+    return notif
+}

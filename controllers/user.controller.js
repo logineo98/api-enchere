@@ -159,9 +159,9 @@ exports.forgot_password = async (req, res) => {
 
             let message = `Votre code de recuperation est: ${token}`
             // const sms = await sendSMS("0022379364385", "0022379364385", message)
-            // const sms = await sendSMSTwilio("+223" + phone, message)
+            const sms = await sendSMSTwilio("+223" + phone, message)
 
-            // if (isEmpty(sms) || sms === null) throw "Erreur d'envoie du code de recuperation"
+            if (isEmpty(sms) || sms === null) throw "Erreur d'envoie du code de recuperation"
 
             res.status(200).json({ response: { token, phone }, message: "Code de recuperation envoyé" })
         }
@@ -263,8 +263,8 @@ exports.checkingPhone = async (req, res) => {
         const code = genRandomNums(5)
 
         const message = "Le code d'activation de votre compte est: " + code
-        const sms = await sendSMSTwilio("+223" + phone, message)
-        if (isEmpty(sms) || sms === null) throw "Erreur lors de l'envoi du code d'activation."
+        // const sms = await sendSMSTwilio("+223" + phone, message)
+        // if (isEmpty(sms) || sms === null) throw "Erreur lors de l'envoi du code d'activation."
         console.log(code)
         res.status(200).json({ response: code, message: "Code d'activation envoyé." })
     } catch (error) {

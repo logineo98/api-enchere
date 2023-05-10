@@ -16,7 +16,7 @@ router.put("/upload_edit", upload.array('file', upload_files_constants.MAX_FILES
 router.put("/:id/:hostID", authenticate, update_enchere)
 router.delete("/:id/:hostID", authenticate, delete_enchere)
 
-router.patch("/participate-in-enchere/:id/:hostID", authenticate, participate_in_enchere)
+router.patch("/participate-in-enchere", participate_in_enchere)
 router.patch("/search/:hostID", authenticate, search_result)
 router.patch("/filter_by_category/:hostID", authenticate, filter_by_category)
 router.patch("/like-enchere/:id/:hostID", authenticate, like_enchere)

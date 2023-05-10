@@ -1,6 +1,6 @@
+const { isValidObjectId } = require("mongoose")
 const EnchereModel = require("../models/enchere.model")
 const UserModel = require("../models/user.model")
-const { getInsecureSHA1ofJSON } = require("../utils/functions")
 
 exports.vitepay_callback = async (req, res) => {
     try {
@@ -8,88 +8,79 @@ exports.vitepay_callback = async (req, res) => {
 
         if (order_id && authenticity) {
 
-            const api_secret = process.env.API_SECRET_KEY
+            // const api_secret = process.env.API_SECRET_KEY
             const orderID = order_id
 
             if (orderID && orderID !== "") {
-                if (!isValidObjectId(orderID)) return res.status(400).json({ status: 0, message: "identifiant de l'acheteur invalide." })
+                if (!isValidObjectId(orderID)) throw "Identifiant de order_id invalide"
 
                 const user = await UserModel.findById(orderID)
-                if (!user) throw "Une erreur est survenue au niveau du serveur lors de la recuperation de l'utilisateur ou utilisateur non trouvé"
+                if (!user) throw "Utilisateur non trouvé ou Erreur survenue au niveau du serveur"
 
-                if (!isValidObjectId(user.tmp.enchereID)) return res.status(400).json({ status: 0, message: "identifiant de l'enchère invalide." })
+                if (!isValidObjectId(user?.tmp?.enchereID)) throw "Identifiant de l'enchère invalide"
 
-                const enchere = await EnchereModel.findById(user.tmp.enchereID)
-                if (!enchere) return res.status(404).json({ status: 0, message: "Désolé, aucune enchère correspondante n'a été trouvée." })
+                const enchere = await EnchereModel.findById(user?.tmp?.enchereID)
+                if (!enchere) throw "Enchère non trouvée ou Erreur survenue au niveau du serveur"
 
-                const amount_gived = user?.tmp?.montant * 100
-                let our_authenticity = `${orderID};${amount_gived};XOF;${api_secret}`
-                our_authenticity = getInsecureSHA1ofJSON(our_authenticity).toUpperCase()
-
-                console.log(our_authenticity)
+                // const amount_gived = user?.tmp?.montant * 100
+                // let our_authenticity = `${orderID};${amount_gived};XOF;${api_secret}`.toUpperCase();
 
                 // if (authenticity === our_authenticity) {
                 if (success && success == 1) {
-                    if (sandbox && sandbox == 1) {
-                        enchere.title = "tz nation"
-                        const enchere_after_participation = await enchere.save()
-                        if (!enchere_after_participation) return res.send({ status: 0, message: "" })
+                    if (sandbox == 1 || sandbox == 0) {
+                        if (user?.tmp?.reserve_price && user?.tmp?.reserve_price === true) {
+                            enchere.history.push({ buyerID: orderID, reserve_price: true, real_montant: enchere.reserve_price, montant: enchere.reserve_price, date: new Date().getTime() })
+                            enchere.enchere_status = "closed"
 
-                        res.send({ status: 1 })
+                            const enchere_after_participation = await enchere.save()
+                            if (!enchere_after_participation) throw "Erreur survenue au niveau du serveur lors de la mise à jour des données de l'enchère"
 
-                        // if (user?.tmp?.reserve_price && user?.tmp?.reserve_price === true) {
-                        //     enchere.history.push({ buyerID, reserve_price: true, real_montant: enchere.reserve_price, montant: enchere.reserve_price, date: new Date().getTime() })
-                        //     enchere.enchere_status = "closed"
+                            user.tmp = null
+                            const user_after_participate_enchere = await user.save()
+                            if (!user_after_participate_enchere) throw "Erreur survenue au niveau du serveur lors de la mise de la variable tmp à null"
 
-                        //     const enchere_after_participation = await enchere.save()
-                        //     if (!enchere_after_participation) return res.status(500).json({ status: 0, message: "Une erreur est survenue au niveau du serveur lors de la participation à l'enchère." })
+                            res.send({ status: 1 })
+                        } else {
+                            // nous allons d'abord recuperer la derniere personne ayant participée à l'enchère afin de pouvoir faire l'incrementation des montants si le montant choisi par l'encherisseur n'est le montant de reserve
+                            if (enchere.history.length !== 0) {
+                                // recuperation du dernier encherisseur
+                                const get_last_encherisseur = enchere.history[enchere.history.length - 1]
 
-                        //     user.tmp = null
-                        //     const user_after_participate_encher = await user.save()
-                        //     if (!user_after_participate_encher) return res.status(500).json({ status: 0, message: "Une erreur est survenue au niveau du serveur lors de la reinitialisation de la variable tmp dans user" })
+                                enchere.history.push({ buyerID: orderID, reserve_price: false, real_montant: user?.tmp?.montant, montant: get_last_encherisseur.montant + user?.tmp?.montant, date: new Date().getTime() })
 
-                        //     res.send({ status: 1 })
-                        // } else {
-                        //     // nous allons d'abord recuperer la derniere personne ayant participée à l'enchère afin de pouvoir faire l'incrementation des montants si le montant choisi par l'encherisseur n'est le montant de reserve
-                        //     if (enchere.history.length !== 0) {
-                        //         // recuperation du dernier encherisseur
-                        //         const get_last_encherisseur = enchere.history[enchere.history.length - 1]
+                                const enchere_after_participation = await enchere.save()
+                                if (!enchere_after_participation) throw "Erreur survenue au niveau du serveur lors de la mise à jour des données de l'enchère"
 
-                        //         enchere.history.push({ buyerID, real_montant: user?.tmp?.montant, montant: get_last_encherisseur.montant + user?.tmp?.montant, date: new Date().getTime() })
+                                user.tmp = null
+                                const user_after_participate_enchere = await user.save()
+                                if (!user_after_participate_enchere) throw "Erreur survenue au niveau du serveur lors de la mise de la variable tmp à null"
 
-                        //         const enchere_after_participation = await enchere.save()
-                        //         if (!enchere_after_participation) return res.status(500).json({ status: 0, message: "Une erreur est survenue au niveau du serveur lors de la participation à l'enchère." })
+                                res.send({ status: 1 })
+                            } else {
+                                enchere.history.push({ buyerID: orderID, reserve_price: false, real_montant: user?.tmp?.montant, montant: enchere.started_price + user?.tmp?.montant, date: new Date().getTime() })
 
-                        //         user.tmp = null
-                        //         const user_after_participate_encher = await user.save()
-                        //         if (!user_after_participate_encher) return res.status(500).json({ status: 0, message: "Une erreur est survenue au niveau du serveur lors de la reinitialisation de la variable tmp dans user" })
+                                const enchere_after_participation = await enchere.save()
+                                if (!enchere_after_participation) throw "Erreur survenue au niveau du serveur lors de la mise à jour des données de l'enchère"
 
-                        //         res.send({ status: 1 })
-                        //     } else {
-                        //         enchere.history.push({ buyerID, real_montant: user?.tmp?.montant, montant: enchere.started_price + user?.tmp?.montant, date: new Date().getTime() })
+                                user.tmp = null
+                                const user_after_participate_enchere = await user.save()
+                                if (!user_after_participate_enchere) throw "Erreur survenue au niveau du serveur lors de la mise de la variable tmp à null"
 
-                        //         const enchere_after_participation = await enchere.save()
-                        //         if (!enchere_after_participation) return res.status(500).json({ status: 0, message: "Une erreur est survenue au niveau du serveur lors de la participation à l'enchère." })
-
-                        //         user.tmp = null
-                        //         const user_after_participate_encher = await user.save()
-                        //         if (!user_after_participate_encher) return res.status(500).json({ status: 0, message: "Une erreur est survenue au niveau du serveur lors de la reinitialisation de la variable tmp dans user" })
-
-                        //         res.send({ status: 1 })
-                        //     }
-                        // }
-                    }
+                                res.send({ status: 1 })
+                            }
+                        }
+                    } else throw "sandbox est different de 0 ou 1"
                 } else if (failure && failure == 1) {
                     user.tmp = null
-                    const user_after_participate_encher = await user.save()
-                    if (!user_after_participate_encher) return res.status(500).json({ status: 0, message: "Une erreur est survenue au niveau du serveur lors de la reinitialisation de la variable tmp dans user" })
+                    const user_after_participate_enchere = await user.save()
+                    if (!user_after_participate_enchere) throw "Erreur survenue au niveau du serveur lors de la mise de la variable tmp à null"
 
-                    res.send({ status: 0, message: "Une erreur de failure=1 retournée par vitepay" })
-                }
-                // } else return res.send({ status: 0, message: "Les deux authenticity ne correspondent pas" })
-            } else return res.send({ status: 0, message: "order_id non reçu" })
-        } else return res.send({ status: 0, message: "order_id ou authenticity non reçu" })
+                    return res.send({ status: 0, message: "L'utilisateur n'a pas confirmé son paiement" })
+                } else throw "Erreur inconnue pour le moment"
+                // }
+            }
+        }
     } catch (error) {
-        res.status(500).send({ message: error })
+        res.send({ status: 0, message: error })
     }
 }
