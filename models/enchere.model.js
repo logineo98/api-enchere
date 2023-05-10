@@ -23,6 +23,7 @@ const enchere_sch = new mongoose.Schema({
         date: { type: Number, default: new Date().getTime() }
     }],
     likes: [{ type: mongoose.Types.ObjectId, ref: "User", required: true }],
+    receive_confirmation: { type: Boolean, default: false },
     trash: { type: Boolean, default: false }
 }, { timestamps: true })
 
