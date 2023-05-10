@@ -5,7 +5,6 @@ const bcrypt = require('bcrypt')
 const { isValidObjectId } = require("mongoose")
 const { constants, regex } = require("../utils/constants")
 const { removePhoneIndicatif } = require("../utils/functions")
-const { default: axios } = require("axios")
 const { send_notif_func } = require("./notification.controller")
 
 //----------- @return boolean depending on whether the user token is valid or not ------------------
@@ -74,13 +73,13 @@ exports.login = async (req, res) => {
         let body = "Authentification reussie!"
         let to = user?.notification_token
         let data = { type: "success" }
-
-        const notif = await send_notif_func(title, body, "", to, data)
+        send_notif_func(title, body, "", to, data).then(ans => console.log(ans))
 
         // Retour de la réponse avec le token et l'employé connecté
-        res.status(200).json({ token, response: rest, notif, message: rest.license_status ? "Vous êtes connecté." : !rest.license_status && "Activer votre compte." })
+        res.status(200).json({ token, response: rest, message: rest.license_status ? "Vous êtes connecté." : !rest.license_status && "Activer votre compte." })
 
     } catch (error) {
+        console.log(error)
         res.status(500).send({ message: error })
     }
 

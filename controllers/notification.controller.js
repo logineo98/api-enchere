@@ -12,7 +12,7 @@ exports.send_notification = (req, res) => {
 }
 
 
-exports.send_notif_func = async (title, body, imageUrl, to, data) => {
+exports.send_notif_func = (title, body, imageUrl, to, data) => {
 
     let message = null
     if (imageUrl === "")
@@ -26,6 +26,5 @@ exports.send_notif_func = async (title, body, imageUrl, to, data) => {
             else
                 message = { notification: { title, body, imageUrl }, token: to, data }
 
-    const notif = await admin.messaging().send(message)
-    return notif
+    return admin.messaging().send(message).then(res => res).catch(err => console.log(err))
 }
