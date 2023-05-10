@@ -68,7 +68,7 @@ exports.update_enchere = async (req, res) => {
 
                     fs.unlink(pathFilename, (error) => {
                         if (error) throw error
-                        console.log(`L'ancienne ${media} a été supprimée`)
+                        // console.log(`L'ancienne ${media} a été supprimée`)
                     })
                 }
             })
@@ -105,9 +105,8 @@ exports.delete_enchere = async (req, res) => {
                 }
 
                 fs.unlink(pathFilename, (error) => {
-                    console.log("error========= ", error)
                     if (error) throw error
-                    console.log(`${media} a été supprimée`)
+                    // console.log(`${media} a été supprimée`)
                 })
 
                 enchere.deleteOne()

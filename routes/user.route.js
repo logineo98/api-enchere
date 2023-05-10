@@ -1,6 +1,6 @@
-const { login, checking, profile, licenseActivation, signup } = require('../controllers/auth.controller')
+const { login, checking, profile, signup } = require('../controllers/auth.controller')
 const { get_user, get_users, update_user, delete_user, send_invitation, forgot_password, confirm_forgot_recovery_code, reset_forgot_password, getAllFirebaseToken, checkingPhone } = require('../controllers/user.controller');
-const { authenticate } = require('../middleware/middleware');
+const { authenticate, upload } = require('../middleware/middleware');
 const { login_validation, update_user_validation } = require('../utils/validations');
 
 const router = require('express').Router()
@@ -10,6 +10,9 @@ router.post("/checking", checking)
 router.post("/login", login_validation, login)
 router.post("/checking-phone", checkingPhone)
 router.post("/signup", signup) //inscription
+
+router.post("/signup-admin", signup) //inscription
+router.post("/upload-image", upload.single("file"), (req, res) => res.status(200).send({ response: req.file.filename })) //inscription admin
 
 
 router.post("/forgot_password", forgot_password)

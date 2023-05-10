@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt')
 const jwt = require("jsonwebtoken")
 const EnchereModel = require("../models/enchere.model")
 const { constants, regex } = require("../utils/constants")
-
+const fs = require("fs")
 
 //--------- @return "user's data" and "success message" ----------------
 //update user's info and password if exist
@@ -16,6 +16,26 @@ exports.update_user = async (req, res) => {
             const salt = await bcrypt.genSalt(10)
             req.body.password = await bcrypt.hash(req.body.password, salt)
         }
+
+
+        if (req.body.dashboard) {
+            if (req.body.image !== req.body.old_img) {
+                const typeFile = req.body.image?.split("-")[0]
+                let pathFilename = ""
+
+                if (typeFile === "image") {
+                    pathFilename = `${__dirname}/../public/images/${req.body.old_img}`
+                } else if (typeFile === "video") {
+                    pathFilename = `${__dirname}/../public/videos/${req.body.old_img}`
+                }
+
+                fs.unlink(pathFilename, (error) => {
+                    if (error) throw error
+                    console.log(`L'ancienne ${req.body.image} a été supprimée`)
+                })
+            }
+        }
+
 
         const user = await UserModel.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true }).select("-password")
 
@@ -34,7 +54,7 @@ exports.get_user = async (req, res) => {
         const user = await UserModel.findById(req.params.id).select("-password")
         if (isEmpty(user)) throw "Cet utilisateur n'existe pas"
 
-        res.status(401).json({ response: user, message: "Utilisateur recuperer avec succès" })
+        res.status(200).json({ response: user, message: "Utilisateur recuperer avec succès" })
     } catch (error) {
         res.status(500).send({ message: error })
     }
@@ -146,7 +166,6 @@ exports.forgot_password = async (req, res) => {
             res.status(200).json({ response: { token, phone }, message: "Code de recuperation envoyé" })
         }
     } catch (error) {
-        console.log(error)
         res.status(500).send({ message: error })
     }
 
@@ -244,8 +263,8 @@ exports.checkingPhone = async (req, res) => {
         const code = genRandomNums(5)
 
         const message = "Le code d'activation de votre compte est: " + code
-        // const sms = await sendSMSTwilio("+223" + phone, message)
-        // if (isEmpty(sms) || sms === null) throw "Erreur lors de l'envoi du code d'activation."
+        const sms = await sendSMSTwilio("+223" + phone, message)
+        if (isEmpty(sms) || sms === null) throw "Erreur lors de l'envoi du code d'activation."
         console.log(code)
         res.status(200).json({ response: code, message: "Code d'activation envoyé." })
     } catch (error) {
