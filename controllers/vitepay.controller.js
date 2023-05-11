@@ -9,9 +9,11 @@ exports.vitepay_callback = async (req, res) => {
         if (order_id && authenticity) {
 
             // const api_secret = process.env.API_SECRET_KEY
-            const orderID = order_id
+            let orderID = order_id
 
             if (orderID && orderID !== "") {
+                orderID = orderID?.split("_")[0]
+
                 if (!isValidObjectId(orderID)) throw "Identifiant de order_id invalide"
 
                 const user = await UserModel.findById(orderID)
