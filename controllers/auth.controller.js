@@ -64,6 +64,10 @@ exports.login = async (req, res) => {
         const pass = await bcrypt.compare(req.body.password, user.password);
         if (!pass) throw `${msg} ou le mot de passe est incorrect.`;
 
+        if (dashboard && !user?.admin) throw `${msg} ou le mot de passe est incorrect.`;
+        if (user?.rejected) throw "Vous n'êtes plus autorisé a acceder a ce compte. Veuillez-nous contacter pour plus de renseignement."
+
+
         // Create token JWT who expired in 3hours
         const token = JsonWebToken.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "3h" })
 
@@ -73,7 +77,7 @@ exports.login = async (req, res) => {
         let body = "Authentification reussie!"
         let to = user?.notification_token
         let data = { type: "success" }
-        send_notif_func(title, body, "", to, data).then(ans => console.log(ans))
+        await send_notif_func(title, body, to, data)
 
         // Retour de la réponse avec le token et l'employé connecté
         res.status(200).json({ token, response: rest, message: rest.license_status ? "Vous êtes connecté." : !rest.license_status && "Activer votre compte." })

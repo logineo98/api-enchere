@@ -3,6 +3,7 @@ const EnchereModel = require("../models/enchere.model")
 const { isEmpty } = require("../utils/functions")
 const fs = require("fs")
 const UserModel = require("../models/user.model")
+const { send_notif_func } = require("./notification.controller")
 
 //-------------@return article created data --------------------
 exports.create_enchere = async (req, res) => {
@@ -11,6 +12,34 @@ exports.create_enchere = async (req, res) => {
         const enchere = new EnchereModel(req.body)
         const saved_data = await enchere.save()
         if (!saved_data) throw "Une erreur est survenue au niveau du serveur lors de la création de l'enchère."
+
+        const user = await UserModel.findById(req.body.sellerID)
+        if (!isEmpty(user)) {
+            let title, body, to, data;
+            if (!user?.vip) {
+                title = "Article en attente";
+                body = "Votre article a bien été ajouter. Vous devez attendre l'approbation de l'equipe de moderation pour qu'il soit publier. Merci"
+                to = user?.notification_token
+                data = null
+                await user.updateOne({ $push: { notifications: { title, body, data, date: new Date().getTime() } } })
+                await send_notif_func(title, body, to, data)
+            } else {
+                title = "Article publié";
+                body = "Votre article a bien été ajouter avec succès. Merci"
+
+                const users = await UserModel.find({ vip: true })
+                if (!isEmpty(users)) {
+                    const promises = users.map(async res => {
+                        return res.updateOne({
+                            $push: { notifications: { title, body, data, date: new Date().getTime() } }
+                        }).then(() => {
+                            return send_notif_func(title, body, res?.notification_token, null)
+                        });
+                    });
+                    await Promise.all(promises);
+                }
+            }
+        }
 
         res.status(200).send({ response: saved_data, message: "Article mis en enchere avec succès mais en état d'attente patienter le temps que nous verifions la conformité de l'article avant de le mettre en enchère. Merci" })
     } catch (error) {

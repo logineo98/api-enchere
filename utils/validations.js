@@ -15,12 +15,12 @@ exports.login_validation = async (req, res, next) => {
         if (phone) phone = req.body.phone.trim();
 
         if (email === "" && phone === "") throw dashboard !== "" ? "Un nom d'utilisateur est requis." : "Un numero de téléphone est requis. 1"
-        if (dashboard && dashboard !== "")
+        if (dashboard)
             if (email && !regex.email.test(email)) throw "Un nom d'utilisateur est requis.";
             else if (phone && !regex.phone.test(phone)) throw "Un nom d'utilisateur est requis.";
 
-        if ((dashboard === "" || !dashboard || isEmpty(dashboard)) && phone && !regex.phone.test(phone)) throw "Format du numéro incorrect."
-        if (dashboard === "" && (isEmpty(phone) || phone === "")) throw "Numéro ou mot de passe incorrect."
+        if ((!dashboard || isEmpty(dashboard)) && phone && !regex.phone.test(phone)) throw "Format du numéro incorrect."
+        if (!dashboard && (isEmpty(phone) || phone === "")) throw "Numéro ou mot de passe incorrect."
         if (isEmpty(password) || password === "") throw "Numéro ou mot de passe incorrect."
         if ((!isEmpty(password) || password !== "") && password.length < 6) throw "Mot de passe trop court."
 
