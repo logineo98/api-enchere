@@ -32,10 +32,15 @@ exports.update_user = async (req, res) => {
                         pathFilename = `${__dirname}/../public/videos/${req.body.old_img}`
                     }
 
-                    fs.unlink(pathFilename, (error) => {
-                        if (error) throw error
-                        console.log(`L'ancienne ${req.body.image} a été supprimée`)
-                    })
+
+                    if (typeof pathFilename === 'string' && fs.existsSync(pathFilename)) {
+                        fs.unlink(pathFilename, (error) => {
+                            if (error) throw error
+                            console.log(`L'ancienne ${media} a été supprimée`)
+                        })
+                    } else {
+                        console.log(`Le fichier ${pathFilename} n'existe pas`);
+                    }
                 }
             }
         }

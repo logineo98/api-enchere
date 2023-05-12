@@ -88,10 +88,14 @@ exports.update_enchere = async (req, res) => {
                         pathFilename = `${__dirname}/../public/videos/${media}`
                     }
 
-                    fs.unlink(pathFilename, (error) => {
-                        if (error) throw error
-                        // console.log(`L'ancienne ${media} a été supprimée`)
-                    })
+                    if (typeof pathFilename === 'string' && fs.existsSync(pathFilename)) {
+                        fs.unlink(pathFilename, (error) => {
+                            if (error) throw error
+                            console.log(`L'ancienne ${media} a été supprimée`)
+                        })
+                    } else {
+                        console.log(`Le fichier ${pathFilename} n'existe pas`);
+                    }
                 }
             })
 
@@ -126,10 +130,15 @@ exports.delete_enchere = async (req, res) => {
                     pathFilename = `${__dirname}/../public/videos/${media}`
                 }
 
-                fs.unlink(pathFilename, (error) => {
-                    if (error) throw error
-                    // console.log(`${media} a été supprimée`)
-                })
+
+                if (typeof pathFilename === 'string' && fs.existsSync(pathFilename)) {
+                    fs.unlink(pathFilename, (error) => {
+                        if (error) throw error
+                        console.log(`L'ancienne ${media} a été supprimée`)
+                    })
+                } else {
+                    console.log(`Le fichier ${pathFilename} n'existe pas`);
+                }
 
                 enchere.deleteOne()
             })

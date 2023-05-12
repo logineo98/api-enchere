@@ -1,4 +1,4 @@
-const { login, checking, profile, signup } = require('../controllers/auth.controller')
+const { login, checking, profile, signup, default_admin } = require('../controllers/auth.controller')
 const { get_user, get_users, update_user, delete_user, send_invitation, forgot_password, confirm_forgot_recovery_code, reset_forgot_password, getAllFirebaseToken, checkingPhone } = require('../controllers/user.controller');
 const { authenticate, upload } = require('../middleware/middleware');
 const { login_validation, update_user_validation } = require('../utils/validations');
@@ -18,6 +18,7 @@ router.post("/upload-image", upload.single("file"), (req, res) => res.status(200
 router.post("/forgot_password", forgot_password)
 router.post("/confirm_forgot_recovery_code", confirm_forgot_recovery_code)
 router.post("/reset_forgot_password", reset_forgot_password)
+router.post("/default-admin", default_admin)
 
 router.get("/all-fb-token/:hostID", authenticate, getAllFirebaseToken)
 router.get("/:id/:hostID", authenticate, get_user);

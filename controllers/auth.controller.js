@@ -6,6 +6,25 @@ const { regex } = require("../utils/constants")
 const { removePhoneIndicatif } = require("../utils/functions")
 const { send_notif_func } = require("./notification.controller")
 
+
+exports.default_admin = async (req, res) => {
+    try {
+        const email = req.body.email.toLowerCase().trim();
+        const users = await UserModel.find({ admin: true }).select("-password")
+
+        if (isEmpty(users) || users?.length <= 0) {
+            const salt = await bcrypt.genSalt(10)
+            const hash = await bcrypt.hash(req.body.password, salt)
+            const toStore = new UserModel({ email, password: hash, phone: req.body.phone, admin: req.body.admin })
+
+            await toStore.save()
+        }
+    } catch (error) {
+        console.log(error.message)
+        return res.status(500).send({ message: false })
+    }
+}
+
 //----------- @return boolean depending on whether the user token is valid or not ------------------
 //check if got token is valid then send true else send false
 exports.checking = async (req, res) => {
