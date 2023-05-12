@@ -17,6 +17,8 @@ exports.update_user = async (req, res) => {
             req.body.password = await bcrypt.hash(req.body.password, salt)
         }
 
+        if (req.body.email) req.body.email = req.body.email.toLowerCase().trim();
+
 
         if (req.body.dashboard) {
             if (req.body.image !== req.body.old_img) {
