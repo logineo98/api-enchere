@@ -16,27 +16,21 @@ exports.create_enchere = async (req, res) => {
         const user = await UserModel.findById(req.body.sellerID)
         if (!isEmpty(user)) {
             let title, body, to, data;
-            if (!user?.vip) {
-                title = "Article en attente";
-                body = "Votre article a bien été ajouter. Vous devez attendre l'approbation de l'equipe de moderation pour qu'il soit publier. Merci"
-                to = user?.notification_token
-                data = null
-                await user.updateOne({ $push: { notifications: { title, body, data, date: new Date().getTime() } } })
-                await send_notif_func(title, body, to, data)
-            } else {
-                title = "Article publié";
+            if (user?.vip === true) {
+                title = "Article publié"
                 body = "Votre article a bien été ajouter avec succès. Merci"
 
                 const users = await UserModel.find({ vip: true })
                 if (!isEmpty(users)) {
                     const promises = users.map(async res => {
-                        return res.updateOne({
-                            $push: { notifications: { title, body, data, date: new Date().getTime() } }
-                        }).then(() => {
-                            return send_notif_func(title, body, res?.notification_token, null)
-                        });
-                    });
-                    await Promise.all(promises);
+                        if (res?._id !== user?._id) {
+                            return res.updateOne({ $push: { notifications: { title, body, data, date: new Date().getTime() } } })
+                                .then(() => {
+                                    return send_notif_func(title, body, res?.notification_token, null)
+                                })
+                        }
+                    })
+                    await Promise.all(promises)
                 }
             }
         }
