@@ -19,7 +19,8 @@ const enchere_sch = new mongoose.Schema({
         categories: { checkbox: { type: Boolean }, message: { type: String, trim: true }, },
         medias: { checkbox: { type: Boolean }, message: { type: String, trim: true }, },
         started_price: { checkbox: { type: Boolean }, message: { type: String, trim: true }, },
-        started_price: { checkbox: { type: Boolean }, message: { type: String, trim: true }, },
+        reserve_price: { checkbox: { type: Boolean }, message: { type: String, trim: true }, },
+        increase_price: { checkbox: { type: Boolean }, message: { type: String, trim: true }, },
     },
     delivery_options: { teliman: { type: Boolean }, own: { type: Boolean }, cost: { type: Boolean }, deliveryPrice: { type: Number } },
     history: [{
