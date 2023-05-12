@@ -13,26 +13,26 @@ exports.create_enchere = async (req, res) => {
         const saved_data = await enchere.save()
         if (!saved_data) throw "Une erreur est survenue au niveau du serveur lors de la création de l'enchère."
 
-        const user = await UserModel.findById(req.body.sellerID)
-        if (!isEmpty(user)) {
-            if (user?.vip === true) {
-                const title = "Article publié"
-                const body = "Un nouvel article a été ajouté."
+        // const user = await UserModel.findById(req.body.sellerID)
+        // if (!isEmpty(user)) {
+        //     if (user?.vip === true) {
+        //         const title = "Article publié"
+        //         const body = "Un nouvel article a été ajouté."
 
-                const users = await UserModel.find({ vip: true })
-                if (!isEmpty(users)) {
-                    const promises = users.map(async res => {
-                        if (res?._id !== user?._id) {
-                            return res.updateOne({ $push: { notifications: { title, body, data, date: new Date().getTime() } } })
-                                .then(() => {
-                                    return send_notif_func(title, body, res?.notification_token, null)
-                                })
-                        }
-                    })
-                    await Promise.all(promises)
-                }
-            }
-        }
+        //         const users = await UserModel.find({ vip: true })
+        //         if (!isEmpty(users)) {
+        //             const promises = users.map(async res => {
+        //                 if (res?._id !== user?._id) {
+        //                     return res.updateOne({ $push: { notifications: { title, body, data, date: new Date().getTime() } } })
+        //                         .then(() => {
+        //                             return send_notif_func(title, body, res?.notification_token, null)
+        //                         })
+        //                 }
+        //             })
+        //             await Promise.all(promises)
+        //         }
+        //     }
+        // }
 
         res.status(200).send({ response: saved_data, message: "Article mis en enchere avec succès mais en état d'attente patienter le temps que nous verifions la conformité de l'article avant de le mettre en enchère. Merci" })
     } catch (error) {
