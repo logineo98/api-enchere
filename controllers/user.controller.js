@@ -23,16 +23,18 @@ exports.update_user = async (req, res) => {
                 const typeFile = req.body.image?.split("-")[0]
                 let pathFilename = ""
 
-                if (typeFile === "image") {
-                    pathFilename = `${__dirname}/../public/images/${req.body.old_img}`
-                } else if (typeFile === "video") {
-                    pathFilename = `${__dirname}/../public/videos/${req.body.old_img}`
-                }
+                if (!isEmpty(req.body.old_img) || req.body.old_img !== undefined) {
+                    if (typeFile === "image") {
+                        pathFilename = `${__dirname}/../public/images/${req.body.old_img}`
+                    } else if (typeFile === "video") {
+                        pathFilename = `${__dirname}/../public/videos/${req.body.old_img}`
+                    }
 
-                fs.unlink(pathFilename, (error) => {
-                    if (error) throw error
-                    console.log(`L'ancienne ${req.body.image} a été supprimée`)
-                })
+                    fs.unlink(pathFilename, (error) => {
+                        if (error) throw error
+                        console.log(`L'ancienne ${req.body.image} a été supprimée`)
+                    })
+                }
             }
         }
 
@@ -263,8 +265,8 @@ exports.checkingPhone = async (req, res) => {
         const code = genRandomNums(5)
 
         const message = "Le code d'activation de votre compte est: " + code
-        // const sms = await sendSMSTwilio("+223" + phone, message)
-        // if (isEmpty(sms) || sms === null) throw "Erreur lors de l'envoi du code d'activation."
+        const sms = await sendSMSTwilio("+223" + phone, message)
+        if (isEmpty(sms) || sms === null) throw "Erreur lors de l'envoi du code d'activation."
         console.log(code)
         res.status(200).json({ response: code, message: "Code d'activation envoyé." })
     } catch (error) {

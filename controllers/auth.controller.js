@@ -1,9 +1,8 @@
 const JsonWebToken = require("jsonwebtoken")
 const UserModel = require("../models/user.model")
-const { isEmpty, genKey, sendSMSTwilio, genRandomNums } = require("../utils/functions")
+const { isEmpty } = require("../utils/functions")
 const bcrypt = require('bcrypt')
-const { isValidObjectId } = require("mongoose")
-const { constants, regex } = require("../utils/constants")
+const { regex } = require("../utils/constants")
 const { removePhoneIndicatif } = require("../utils/functions")
 const { send_notif_func } = require("./notification.controller")
 
@@ -90,33 +89,6 @@ exports.login = async (req, res) => {
 }
 
 
-//----------- @return "logged user's data" ------------------
-//when user is logged we retrieve the licenseKey from his datas and compare it with his input licenseKey
-//if it matches, we update his license_status to true else we throw errors
-// exports.licenseActivation = async (req, res) => {
-//     try {
-//         const { licenseKey, userID } = req.body
-
-//         if (!isValidObjectId(userID)) throw "ID fourni est incorrect ou invalide."
-//         if (!licenseKey || licenseKey === "") throw "Un code d'activation est requis."
-
-//         const user = await UserModel.findById(userID).select("-password")
-//         if (isEmpty(user)) throw "Ce compte n'existe pas."
-
-//         const isLicenseValid = licenseKey === user?.licenseKey ? true : false
-//         if (!isLicenseValid) throw "Le code d'activation est incorrect."
-
-//         const updated = await UserModel.findByIdAndUpdate(userID, { $set: { license_status: true } }, { new: true }).select("-password")
-//         if (isEmpty(updated)) throw "Echec d'activation de votre code."
-//         res.status(200).json({ response: updated, message: "Compte activé." })
-
-//     } catch (error) {
-//         console.log(error)
-//         res.status(500).send({ message: error });
-//     }
-// }
-
-
 exports.signup = async (req, res) => {
     try {
         const { activation_code, code, password_confirm, facebook, dashboard } = req.body
@@ -176,94 +148,3 @@ exports.signup = async (req, res) => {
     }
 
 }
-
-
-// exports.register = (req, res) => {
-//     const { phone, password, password_confirm } = req.body
-
-//     const { error, initialError } = register_validation(phone, password, password_confirm)
-
-
-//     if (error !== initialError) {
-//         return res.status(400).json({ message: error })
-//     } else {
-
-//         UserModel.find({ vip: true })
-//             .then(users => {
-//                 if (users.length !== 0) {
-//                     // ce tableau va contenir la liste des numeros de telephone invité
-//                     let getAllNumbersPhoneInvited = []
-
-//                     users.forEach(user => {
-//                         if (user.invitations.length !== 0) {
-//                             user.invitations.forEach(phone => {
-//                                 if (!getAllNumbersPhoneInvited.includes(phone)) getAllNumbersPhoneInvited.push(phone)
-//                             })
-//                         }
-//                     })
-
-//                     // une clé de licence sera generee
-//                     const licenceKey = genKey()
-//                     licenceKey.get((error, code) => {
-//                         if (error) return res.status(500).json({ message: error.message })
-
-//                         bcrypt.hash(password, 10)
-//                             .then(hash => {
-//                                 const user = new UserModel({ phone, password: hash })
-
-//                                 user.save()
-//                                     .then((user) => {
-//                                         user.licenseKey = code
-//                                         if (getAllNumbersPhoneInvited.includes(phone)) user.vip = true
-
-//                                         user.save()
-//                                             .then((user) => {
-
-//                                                 // l'envoie de la clé de la licence a l'utilisateur
-//                                                 // sendSMS(constants.sms_sender_number, "00223" + user?.phone, code)
-//                                                 sendSMSTwilio("+223" + user.phone, code)
-//                                                     .then(sms => {
-//                                                         res.status(201).json({ response: user, message: "L'utilisateur a été crée avec succès", sms })
-//                                                     })
-//                                                     .catch((error) => res.status(500).json({ message: error.message }))
-//                                             })
-//                                             .catch((error) => res.status(500).json({ message: error }))
-//                                     })
-//                                     .catch((error) => res.status(500).json(register_error_validation(error)))
-//                             })
-//                             .catch(error => res.status(500).json({ message: error }))
-//                     })
-//                 } else {
-//                     const licenceKey = genKey()
-//                     licenceKey.get((error, code) => {
-//                         if (error) return res.status(500).json({ message: error.message })
-
-//                         bcrypt.hash(password, 10)
-//                             .then(hash => {
-//                                 const user = new UserModel({ phone, password: hash })
-
-//                                 user.save()
-//                                     .then((user) => {
-//                                         user.licenseKey = code
-
-//                                         user.save()
-//                                             .then((user) => {
-
-//                                                 // sendSMS(constants.sms_sender_number, "00223" + user?.phone, code)
-//                                                 sendSMSTwilio("+223" + user.phone, code)
-//                                                     .then(sms => {
-//                                                         res.status(201).json({ response: user, message: "L'utilisateur a été crée avec succès", sms })
-//                                                     })
-//                                                     .catch((error) => res.status(500).json({ message: error.message }))
-//                                             })
-//                                             .catch((error) => res.status(500).json({ message: error.message }))
-//                                     })
-//                                     .catch((error) => res.status(500).json(register_error_validation(error)))
-//                             })
-//                             .catch(error => res.status(500).json({ message: error }))
-//                     })
-//                 }
-//             })
-//             .catch((error) => res.status(500).json({ message: error.message }))
-//     }
-// }
