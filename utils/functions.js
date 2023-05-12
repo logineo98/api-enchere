@@ -121,7 +121,7 @@ exports.sendSMS = async (from, to, message) => {
 // Function to send SMS using Twilio
 exports.sendSMSTwilio = async (toNumber, message) => {
     const accountSid = 'AC517c6b441a2e73f9578da69db46d3204';
-    const authToken = '73418f47db54f9abbe5f953b7fdef00c';
+    const authToken = '3442d8c071f9e97ad0cf7ed590fb53e9';
     const fromNumber = '+13203011002';
 
     const client = twilio(accountSid, authToken);
