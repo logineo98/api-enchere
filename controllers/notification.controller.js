@@ -7,17 +7,18 @@ exports.send_notification = (req, res) => {
 
     let message = null
 
-    if (data === null)
+    if (!data)
         message = { notification: { title, body }, token: to }
     else
         message = { notification: { title, body }, token: to, data }
 
     // const message = { notification: { title, body, imageUrl }, token: to, data }
 
-    if (title !== "" || body !== "")
-        UserModel.findOne({ notification_token: to })
-            .select('-password').then(user => user.updateOne({ $push: { notifications: { title, body, data, date: new Date().getTime() } } }))
-            .catch(error => res.status(500).json({ message: error }))
+    // if (title !== "" || body !== "")
+    //     UserModel.findOne({ notification_token: to })
+    //         .select('-password')
+    //         .then(user => user.updateOne({ $push: { notifications: { title, body, data, date: new Date().getTime() } } }))
+    //         .catch(error => res.status(500).json({ message: error }))
 
 
     admin.messaging().send(message)
