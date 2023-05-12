@@ -77,7 +77,7 @@ exports.login = async (req, res) => {
         // let to = user?.notification_token
         // let data = { type: "success" }
         // await send_notif_func(title, body, to, data)
-
+        //ok
         // Retour de la réponse avec le token et l'employé connecté
         res.status(200).json({ token, response: rest, message: rest.license_status ? "Vous êtes connecté." : !rest.license_status && "Activer votre compte." })
 
