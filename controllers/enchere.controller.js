@@ -15,10 +15,9 @@ exports.create_enchere = async (req, res) => {
 
         const user = await UserModel.findById(req.body.sellerID)
         if (!isEmpty(user)) {
-            let title, body, to, data;
             if (user?.vip === true) {
-                title = "Article publié"
-                body = "Votre article a bien été ajouter avec succès. Merci"
+                const title = "Article publié"
+                const body = "Un nouvel article a été ajouté."
 
                 const users = await UserModel.find({ vip: true })
                 if (!isEmpty(users)) {
