@@ -76,7 +76,7 @@ exports.update_enchere = async (req, res) => {
 
         let medias = enchere.medias
 
-        if (old_img && (!isEmpty(old_img) || old_img?.length !== 0)) {
+        if (new_img && old_img) {
             medias?.forEach(media => {
                 if (!old_img?.includes(media)) {
                     const typeFile = media?.split("-")[0]
@@ -102,10 +102,10 @@ exports.update_enchere = async (req, res) => {
             req.body.medias = new_img ? [...old_img, ...new_img] : [...old_img]
         }
 
-
         const enchere_after_update = await EnchereModel.findByIdAndUpdate(req.params.id, { ...req.body }, { new: true })
         if (!enchere_after_update) throw "Une erreur est survenue au niveau du serveur lors de la mise à de l'enchère."
         res.send({ response: enchere_after_update, message: "La mise à jour de l'enchère a été effectuée avec succès." })
+
     } catch (error) {
         res.status(500).send({ message: error })
     }
